@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MazeSolver.iml" filepath="$PROJECT_DIR$/MazeSolver.iml" />
+      <module fileurl="file://$PROJECT_DIR$/distribution/distribution.iml" filepath="$PROJECT_DIR$/distribution/distribution.iml" />
+      <module fileurl="file://$PROJECT_DIR$/maze-parser/maze-parser.iml" filepath="$PROJECT_DIR$/maze-parser/maze-parser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/motion-planning/motion-planning.iml" filepath="$PROJECT_DIR$/motion-planning/motion-planning.iml" />
+      <module fileurl="file://$PROJECT_DIR$/twitter-integrator/twitter-integrator.iml" filepath="$PROJECT_DIR$/twitter-integrator/twitter-integrator.iml" />
     </modules>
   </component>
 </project>

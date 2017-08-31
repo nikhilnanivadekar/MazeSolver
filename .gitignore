@@ -1,2 +1,7 @@
 .idea/workspace.xml
+.idea/misc.xml
+.idea/libraries/**
+.idea/libraries
 out
+distribution/dependency-reduced-pom.xml
+**/target
