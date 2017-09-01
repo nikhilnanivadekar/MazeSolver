@@ -35,6 +35,11 @@ public class MarkerColorRangeRecognitionTest
         this.pickedByRange(MarkerColorRange.START_MARKER, 127, 174, 94);
         this.pickedByRange(MarkerColorRange.START_MARKER, 124, 171, 91);
         this.pickedByRange(MarkerColorRange.START_MARKER, 123, 170, 90);
+
+        this.pickedByRange(MarkerColorRange.START_MARKER, 20, 89, 61);
+        this.pickedByRange(MarkerColorRange.START_MARKER, 20, 85, 58);
+        this.pickedByRange(MarkerColorRange.START_MARKER,  6, 47, 26);
+        this.pickedByRange(MarkerColorRange.START_MARKER,  9, 65, 40);
     }
 
     @Test
@@ -53,6 +58,10 @@ public class MarkerColorRangeRecognitionTest
         this.pickedByRange(MarkerColorRange.STOP_MARKER, 102, 136, 214);
 
         this.pickedByRange(MarkerColorRange.STOP_MARKER, 142, 190, 255);
+
+        this.pickedByRange(MarkerColorRange.STOP_MARKER, 26, 34, 60);
+        this.pickedByRange(MarkerColorRange.STOP_MARKER, 39, 53, 80);
+        this.pickedByRange(MarkerColorRange.STOP_MARKER, 24, 30, 53);
     }
 
     @Test
