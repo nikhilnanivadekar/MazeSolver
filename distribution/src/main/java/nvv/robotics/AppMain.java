@@ -7,11 +7,13 @@ import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
+import java.util.Scanner;
+
 public class AppMain
 {
     private static final String HASH_TO_POLL = "nikhilev3";
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
         Configuration build = AppMain.getConfiguration();
         TwitterStream twitterStream = new TwitterStreamFactory(build).getInstance();
@@ -19,6 +21,20 @@ public class AppMain
 
         twitterStream.addListener(listener);
         twitterStream.filter(HASH_TO_POLL);
+
+        boolean run = true;
+
+        Scanner scanner = new Scanner(System.in);
+        while (run)
+        {
+            run = !scanner.hasNext("stop");
+        }
+
+        twitterStream.clearListeners();
+        twitterStream.cleanUp();
+        twitterStream.shutdown();
+
+        System.exit(0);
     }
 
     private static Configuration getConfiguration()
