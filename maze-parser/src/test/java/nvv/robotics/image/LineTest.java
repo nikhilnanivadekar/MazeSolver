@@ -2,6 +2,8 @@ package nvv.robotics.image;
 
 import org.junit.Assert;
 import org.junit.Test;
+import robotics.maze.robotics.image.CoordinatePoint;
+import robotics.maze.robotics.image.Line;
 
 public class LineTest
 {

@@ -1,6 +1,10 @@
 package nvv.robotics.dijkstra;
 
 import org.junit.Test;
+import robotics.maze.dijkstra.DijkstraAlgorithm;
+import robotics.maze.dijkstra.Edge;
+import robotics.maze.dijkstra.Graph;
+import robotics.maze.dijkstra.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -12,6 +12,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="maze-parser" />
+    <orderEntry type="module" module-name="motion-planning" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections-api:8.2.0" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections:8.2.0" level="project" />

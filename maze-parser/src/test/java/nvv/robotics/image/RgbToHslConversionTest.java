@@ -2,6 +2,7 @@ package nvv.robotics.image;
 
 import org.junit.Assert;
 import org.junit.Test;
+import robotics.maze.robotics.image.MarkerColorRange;
 
 public class RgbToHslConversionTest
 {

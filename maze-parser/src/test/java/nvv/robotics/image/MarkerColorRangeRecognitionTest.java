@@ -5,6 +5,7 @@ import org.eclipse.collections.impl.factory.Lists;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import robotics.maze.robotics.image.MarkerColorRange;
 
 public class MarkerColorRangeRecognitionTest
 {

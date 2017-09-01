@@ -1,6 +1,8 @@
 package nvv.robotics.dijkstra;
 
 import org.junit.Test;
+import robotics.maze.dijkstra.Constants;
+import robotics.maze.dijkstra.DijkstraAlgorithmMatrix;
 
 public class DijkstraAlgorithmMatrixTest
 {
