@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class JpegImageWrapper
-implements ImageWrapper
+        implements ImageWrapper
 {
     private final int width;
     private final int height;
@@ -39,7 +39,6 @@ implements ImageWrapper
         return this.height;
     }
 
-
     @Override
     public boolean pixelMatchesColorRange(int x, int y, MarkerColorRange colorRange)
     {
@@ -59,14 +58,19 @@ implements ImageWrapper
 
     public static JpegImageWrapper loadFile(String fileName)
     {
+        return JpegImageWrapper.loadFile(new File(fileName));
+    }
+
+    public static JpegImageWrapper loadFile(File file)
+    {
         BufferedImage image = null;
         try
         {
-            image = ImageIO.read(new File(fileName));
+            image = ImageIO.read(file);
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Ay, carrumba", e);
+            throw new RuntimeException("Unable to open file:" + file.getAbsolutePath(), e);
         }
 
         return new JpegImageWrapper(image);
