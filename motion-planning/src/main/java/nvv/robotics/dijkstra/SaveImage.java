@@ -10,6 +10,7 @@ public class SaveImage
 {
     public static void main(String[] args) throws IOException
     {
+        /*
         int xAxisSize = 5;
         int yAxisSize = 5;
         int[][] graph = Utils.getGraph5By5();
@@ -54,5 +55,6 @@ public class SaveImage
 
         ImageIO.write(bufferedImage, "jpg", new File("image.jpg"));
         System.out.println("Image Created");
+        */
     }
 }
