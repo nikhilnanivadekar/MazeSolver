@@ -1,5 +1,9 @@
 package nvv.robotics.integration;
 
+import nvv.robotics.image.JpegImageWrapper;
+import nvv.robotics.projection.MazeMap;
+import nvv.robotics.projection.MazeParser;
+import nvv.robotics.projection.MazeParserRunner;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 import twitter4j.Logger;
 import twitter4j.MediaEntity;
@@ -28,8 +32,18 @@ public class CustomStatusListener implements StatusListener
 
             MediaEntity mediaEntity = ArrayIterate.getFirst(status.getMediaEntities());
 
-            LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
-            File file = FileUtils.downloadAndSaveMedia(mediaEntity);
+            if (mediaEntity != null)
+            {
+                LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
+                File file = FileUtils.downloadAndSaveMedia(mediaEntity);
+                JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
+
+                MazeParser mazeParser = new MazeParser();
+
+                MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+
+                MazeParserRunner.printMazeMap(mazeMap);
+            }
         }
         catch (Exception e)
         {
