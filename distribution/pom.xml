@@ -34,9 +34,16 @@
                                     <mainClass>nvv.robotics.AppMain</mainClass>
                                 </transformer>
                             </transformers>
-                            <excludes>META-INF\*.SF</excludes>
-                            <excludes>META-INF\*.DSA</excludes>
-                            <excludes>META-INF\*.RSA</excludes>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
