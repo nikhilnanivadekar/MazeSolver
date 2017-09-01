@@ -1,38 +1,33 @@
 package nvv.robotics.dijkstra;
 
+import nvv.robotics.projection.PointType;
+
 public class Vertex
 {
-    private final String id;
-    private final String name;
-    private final long x;
-    private final long y;
+    private final int x;
+    private final int y;
+    private final PointType pointType;
 
-    public Vertex(String id, String name, long x, long y)
+    public Vertex(int x, int y, PointType pointType)
     {
-        this.id = id;
-        this.name = name;
         this.x = x;
         this.y = y;
+        this.pointType = pointType;
     }
 
-    public String getId()
-    {
-        return id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public long getX()
+    public int getX()
     {
         return x;
     }
 
-    public long getY()
+    public int getY()
     {
         return y;
+    }
+
+    public PointType getPointType()
+    {
+        return pointType;
     }
 
     @Override
@@ -45,28 +40,25 @@ public class Vertex
 
         if (x != vertex.x) return false;
         if (y != vertex.y) return false;
-        if (id != null ? !id.equals(vertex.id) : vertex.id != null) return false;
-        return !(name != null ? !name.equals(vertex.name) : vertex.name != null);
+        return pointType == vertex.pointType;
     }
 
     @Override
     public int hashCode()
     {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (int) (x ^ (x >>> 32));
-        result = 31 * result + (int) (y ^ (y >>> 32));
+        int result = x;
+        result = 31 * result + y;
+        result = 31 * result + pointType.hashCode();
         return result;
     }
 
     @Override
     public String toString()
     {
-        return "Vertex{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", x=" + x +
+        return "Vertex(" +
+                "x=" + x +
                 ", y=" + y +
-                '}';
+                ", pointType=" + pointType +
+                ')';
     }
 }

@@ -2,11 +2,6 @@ package nvv.robotics.projection;
 
 public class MazeMap
 {
-    private static final int EMPTY = 0;
-    private static final int WALL = 1;
-    private static final int START = 2;
-    private static final int STOP = 3;
-
     private int[][] cells;
     private int width;
     private int height;
@@ -21,22 +16,22 @@ public class MazeMap
 
     public void setEmpty(int row, int col)
     {
-        this.cells[row][col] = EMPTY;
+        this.cells[row][col] = PointType.EMPTY.getColorId();
     }
 
     public void setWall(int row, int col)
     {
-        this.cells[row][col] = WALL;
+        this.cells[row][col] = PointType.WALL.getColorId();
     }
 
     public void setStart(int row, int col)
     {
-        this.cells[row][col] = START;
+        this.cells[row][col] = PointType.START.getColorId();
     }
 
     public void setStop(int row, int col)
     {
-        this.cells[row][col] = STOP;
+        this.cells[row][col] = PointType.STOP.getColorId();
     }
 
     public int get(int row, int col)

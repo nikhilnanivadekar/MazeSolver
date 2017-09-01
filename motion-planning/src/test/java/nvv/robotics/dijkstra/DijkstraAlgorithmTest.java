@@ -38,7 +38,8 @@ public class DijkstraAlgorithmTest
 
     private Vertex getVertex(int vertexNumber)
     {
-        return new Vertex(VERTEX_ID_PREFIX + vertexNumber, VERTEX_NAME_PREFIX + vertexNumber, 0, 0);
+//        return new Vertex(0, 0);
+        return null;
     }
 
     private void addEdge(List<Edge> edges, int sourceVertexId, int targetVertexId, long weight)

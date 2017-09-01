@@ -1,9 +1,12 @@
 package nvv.robotics.integration;
 
+import nvv.robotics.dijkstra.MazeMapToVertexListAdapter;
+import nvv.robotics.dijkstra.Vertex;
 import nvv.robotics.image.JpegImageWrapper;
 import nvv.robotics.projection.MazeMap;
 import nvv.robotics.projection.MazeParser;
 import nvv.robotics.projection.MazeParserRunner;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 import twitter4j.Logger;
 import twitter4j.MediaEntity;
@@ -43,6 +46,8 @@ public class CustomStatusListener implements StatusListener
                 MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
 
                 MazeParserRunner.printMazeMap(mazeMap);
+
+                MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
             }
         }
         catch (Exception e)
