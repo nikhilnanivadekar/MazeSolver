@@ -6,7 +6,7 @@ public class MazeParserRunner
 {
     public static void main(String[] args)
     {
-        String path = "C:\\Users\\Vovkin\\projects\\projection\\";
+        String path = "";
 //        String fileName = "maze1_straight.jpg";
 //        String fileName = "maze1_perspective.jpg";
 //        String fileName = "maze3_topdown.jpg";
@@ -26,7 +26,7 @@ public class MazeParserRunner
         printMazeMap(mazeMap);
     }
 
-    static private void printMazeMap(MazeMap mazeMap)
+    public static void printMazeMap(MazeMap mazeMap)
     {
         int width = mazeMap.getWidth();
         int height = mazeMap.getHeight();
