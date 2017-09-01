@@ -25,7 +25,7 @@ public class FileUtils
         out.close();
         in.close();
         byte[] response = out.toByteArray();
-        String fileName = "F://" + mediaEntity.getId() + ".jpg";
+        String fileName = mediaEntity.getId() + ".jpg";
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(response);
         fos.close();
