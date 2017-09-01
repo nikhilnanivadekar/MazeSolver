@@ -7,6 +7,7 @@ import nvv.robotics.image.MarkerColorRange;
 import org.eclipse.collections.api.list.ListIterable;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.block.factory.Comparators;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.tuple.Tuples;
 
@@ -15,7 +16,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -86,13 +86,13 @@ public class MazeParser
             throw new RuntimeException("Only detected corner marker boundaries for " + cornerBoundaries.size() + " corners");
         }
 
-        cornerBoundaries.collect(this::findCenterAndDiameter).sortThis(Comparator.comparingDouble(Pair::getTwo))
-                .reverseThis().forEach(each -> System.out.println(each.getOne() + " -- " + each.getTwo()));
+        cornerBoundaries.collect(this::findCenterAndDiameter)
+                .sortThis(Comparators.byFunction(Pair::getTwo, Comparators.reverseNaturalOrder()))
+                .forEach(each -> System.out.println(each.getOne() + " -- " + each.getTwo()));
 
         MutableList<CoordinatePoint> cornerCenters = cornerBoundaries
                 .collect(this::findCenterAndDiameter)
-                .sortThis(Comparator.comparingDouble(Pair::getTwo))
-                .reverseThis()
+                .sortThis(Comparators.byFunction(Pair::getTwo, Comparators.reverseNaturalOrder()))
                 .take(4)
                 .collect(Pair::getOne);
 
@@ -556,7 +556,7 @@ public class MazeParser
     {
         try
         {
-            ImageIO.write(bi, "PNG", new File("C:\\Users\\Vovkin\\projects\\projection\\" + fileName));
+            ImageIO.write(bi, "PNG", new File(fileName));
         }
         catch (IOException e)
         {
