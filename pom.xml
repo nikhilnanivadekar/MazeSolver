@@ -13,6 +13,7 @@
 
 
     <modules>
+        <module>core</module>
         <module>maze-parser</module>
         <module>twitter-integrator</module>
         <module>motion-planning</module>

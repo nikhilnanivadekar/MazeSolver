@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="maze-parser" />
     <orderEntry type="module" module-name="motion-planning" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections-api:8.2.0" level="project" />

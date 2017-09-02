@@ -1,25 +1,22 @@
 package robotics.maze.robotics.projection;
 
-import robotics.maze.robotics.image.CoordinatePoint;
-import robotics.maze.robotics.image.ImageWrapper;
-import robotics.maze.robotics.image.Line;
-import robotics.maze.robotics.image.MarkerColorRange;
 import org.eclipse.collections.api.list.ListIterable;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.block.factory.Comparators;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.tuple.Tuples;
+import robotics.maze.FileUtils;
+import robotics.maze.PointType;
+import robotics.maze.robotics.image.CoordinatePoint;
+import robotics.maze.robotics.image.ImageWrapper;
+import robotics.maze.robotics.image.Line;
+import robotics.maze.robotics.image.MarkerColorRange;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
-
-import static robotics.maze.robotics.projection.FeatureType.CORNER;
 
 public class MazeParser
 {
@@ -41,23 +38,23 @@ public class MazeParser
             {
                 if (imageWrapper.pixelMatchesColorRange(column, row, MarkerColorRange.CORNER_MARKER))
                 {
-                    parsedMaze.createAndSetFeature(column, row, FeatureType.CORNER);
+                    parsedMaze.createAndSetFeature(column, row, PointType.CORNER);
                 }
                 else if (imageWrapper.pixelMatchesColorRange(column, row, MarkerColorRange.START_MARKER))
                 {
-                    parsedMaze.createAndSetFeature(column, row, FeatureType.START);
+                    parsedMaze.createAndSetFeature(column, row, PointType.START);
                 }
                 else if (imageWrapper.pixelMatchesColorRange(column, row, MarkerColorRange.STOP_MARKER))
                 {
-                    parsedMaze.createAndSetFeature(column, row, FeatureType.STOP);
+                    parsedMaze.createAndSetFeature(column, row, PointType.FINISH);
                 }
                 else if (imageWrapper.pixelMatchesColorRange(column, row, MarkerColorRange.WALL_MARKER))
                 {
-                    parsedMaze.createAndSetFeature(column, row, FeatureType.WALL);
+                    parsedMaze.createAndSetFeature(column, row, PointType.WALL);
                 }
                 else
                 {
-                    parsedMaze.createAndSetFeature(column, row, FeatureType.EMPTY);
+                    parsedMaze.createAndSetFeature(column, row, PointType.EMPTY);
                 }
             }
         }
@@ -70,7 +67,7 @@ public class MazeParser
             for (int column = 0; column < width; column++)
             {
                 MazeFeature feature = parsedMaze.getFeatureAt(row, column);
-                if (feature.getType() == CORNER && feature.isNotTagged())
+                if (feature.getType() == PointType.CORNER && feature.isNotTagged())
                 {
                     // fill the corner area with tags
                     cornerBoundaries.add(this.floodFill(parsedMaze, row, column, cornerIndex++));
@@ -86,9 +83,9 @@ public class MazeParser
             throw new RuntimeException("Only detected corner marker boundaries for " + cornerBoundaries.size() + " corners");
         }
 
-        cornerBoundaries.collect(this::findCenterAndDiameter)
+        /*cornerBoundaries.collect(this::findCenterAndDiameter)
                 .sortThis(Comparators.byFunction(Pair::getTwo, Comparators.reverseNaturalOrder()))
-                .forEach(each -> System.out.println(each.getOne() + " -- " + each.getTwo()));
+                .forEach(each -> System.out.println(each.getOne() + " -- " + each.getTwo()));*/
 
         MutableList<CoordinatePoint> cornerCenters = cornerBoundaries
                 .collect(this::findCenterAndDiameter)
@@ -125,10 +122,10 @@ public class MazeParser
             lrCenter = cornerCenters.get(2);
         }
 
-        System.out.println("UL: " + ulCenter);
-        System.out.println("UR: " + urCenter);
-        System.out.println("LL: " + llCenter);
-        System.out.println("LR: " + lrCenter);
+//        System.out.println("UL: " + ulCenter);
+//        System.out.println("UR: " + urCenter);
+//        System.out.println("LL: " + llCenter);
+//        System.out.println("LR: " + lrCenter);
 
         MazeMap result = new MazeMap(targetWidth, targetHeight);
 
@@ -153,8 +150,8 @@ public class MazeParser
         boolean verticalAlmostParallel = verticalSlopeRatio > 0.99 && verticalSlopeRatio < 1.01;
         boolean horizontalAlmostParallel = horizontalSlopeRatio > 0.99 && horizontalSlopeRatio < 1.01;
 
-        System.out.println("   Top: " + topLength + ", " + topEdge + " Bottom: " + bottomLength + ", " + bottomEdge + ", t/b: " + horizontalSlopeRatio);
-        System.out.println("  Left: " + leftLength + ", " + leftEdge + " Right: " + rightLength + ", " + rightEdge + ", l/r: " + verticalSlopeRatio);
+//        System.out.println("   Top: " + topLength + ", " + topEdge + " Bottom: " + bottomLength + ", " + bottomEdge + ", t/b: " + horizontalSlopeRatio);
+//        System.out.println("  Left: " + leftLength + ", " + leftEdge + " Right: " + rightLength + ", " + rightEdge + ", l/r: " + verticalSlopeRatio);
 
         CoordinatePoint[] topPoints = new CoordinatePoint[targetWidth];
         CoordinatePoint[] bottomPoints = new CoordinatePoint[targetWidth];
@@ -329,7 +326,7 @@ public class MazeParser
         {
             drawLine(bi, grid[0][curCol], grid[targetHeight - 1][curCol]);
         }
-        saveImageToFile(bi, "parsed_lined_maze.PNG");
+        FileUtils.saveImageToFile(bi, "parsed_lined_maze.PNG");
 
         double eighthOfGrid = Math.min(topLength, bottomLength) / (targetHeight * 8.0);
 
@@ -342,7 +339,7 @@ public class MazeParser
                 int rowToCheck = (int) grid[curRow][curCol].getRow();
                 int colToCheck = (int) grid[curRow][curCol].getColumn();
 
-                switch (parsedMaze.getCommonFeatureTypeAround(rowToCheck, colToCheck, radiusToCheck))
+                switch (parsedMaze.getCommonPointTypeAround(rowToCheck, colToCheck, radiusToCheck))
 //                switch (parsedMaze.getFeatureAt(rowToCheck, colToCheck).getType())
                 {
                     case EMPTY:
@@ -358,7 +355,7 @@ public class MazeParser
                     case START:
                         result.setStart(curRow, curCol);
                         break;
-                    case STOP:
+                    case FINISH:
                         result.setStop(curRow, curCol);
                         break;
                 }
@@ -407,25 +404,25 @@ public class MazeParser
             MazeFeature east = feature;
 
             for (MazeFeature next = west;
-                 next != null && next.getType() == CORNER && next.isNotTagged();
+                 next != null && next.getType() == PointType.CORNER && next.isNotTagged();
                  next = parsedMaze.getFeatureAt(west.getY(), west.getX() - 1)) // AND CORNER
             {
                 west = next;
             }
 
-            if (parsedMaze.findAnyNeighborNot(west.getX(), west.getY(), CORNER) != null)
+            if (parsedMaze.findAnyNeighborNot(west.getX(), west.getY(), PointType.CORNER) != null)
             {
                 boundary.add(west);
             }
 
             for (MazeFeature next = east;
-                 next != null && next.getType() == CORNER && next.isNotTagged();
+                 next != null && next.getType() == PointType.CORNER && next.isNotTagged();
                  next = parsedMaze.getFeatureAt(east.getY(), east.getX() + 1)) // AND CORNER
             {
                 east = next;
             }
 
-            if (parsedMaze.findAnyNeighborNot(east.getX(), east.getY(), CORNER) != null)
+            if (parsedMaze.findAnyNeighborNot(east.getX(), east.getY(), PointType.CORNER) != null)
             {
                 boundary.add(east);
             }
@@ -435,13 +432,13 @@ public class MazeParser
                 parsedMaze.getFeatureAt(east.getY(), col).setTag(tag);
 
                 MazeFeature featureNorth = parsedMaze.getFeatureAt(east.getY() - 1, col);
-                if (featureNorth != null && featureNorth.getType() == CORNER && featureNorth.isNotTagged())
+                if (featureNorth != null && featureNorth.getType() == PointType.CORNER && featureNorth.isNotTagged())
                 {
                     queue.add(featureNorth);
                 }
 
                 MazeFeature featureSouth = parsedMaze.getFeatureAt(east.getY() + 1, col);
-                if (featureSouth != null && featureSouth.getType() == CORNER && featureSouth.isNotTagged())
+                if (featureSouth != null && featureSouth.getType() == PointType.CORNER && featureSouth.isNotTagged())
                 {
                     queue.add(featureSouth);
                 }
@@ -537,9 +534,18 @@ public class MazeParser
                     case START:
                         green = 255;
                         break;
-                    case STOP:
+                    case FINISH:
                         blue = 255;
                         break;
+                    case VISITED:
+                        red = 255;
+                        green = 255;
+                        blue = 224;
+                        break;
+                    case PATH:
+                        red = 34;
+                        green = 139;
+                        blue = 34;
                 }
 
                 int colorWithAlpha = (alpha << 24) | (red << 16) | (green << 8) | blue;
@@ -548,19 +554,59 @@ public class MazeParser
             }
         }
 
-        saveImageToFile(bi, "parsed_maze.PNG");
+        FileUtils.saveImageToFile(bi, "parsed_maze.PNG");
         return bi;
     }
 
-    private void saveImageToFile(BufferedImage bi, String fileName)
+    public static BufferedImage writeSolvedMazeAsImage(MazeMap mazeMap)
     {
-        try
+        int width = mazeMap.getWidth();
+        int height = mazeMap.getHeight();
+
+        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int row = 0; row < height; row++)
         {
-            ImageIO.write(bi, "PNG", new File(fileName));
+            for (int column = 0; column < width; column++)
+            {
+                int red = 0;
+                int green = 0;
+                int blue = 0;
+                int alpha = 255;
+                switch (PointType.getPointType(mazeMap.get(row, column)))
+                {
+                    case EMPTY:
+                        red = green = blue = 255;
+                        break;
+                    case CORNER:
+                        red = 255;
+                        break;
+                    case WALL:
+                        break;
+                    case START:
+                        green = 255;
+                        break;
+                    case FINISH:
+                        blue = 255;
+                        break;
+                    case VISITED:
+                        red = 245;
+                        green = 245;
+                        blue = 245;
+                        break;
+                    case PATH:
+                        red = 34;
+                        green = 139;
+                        blue = 34;
+                }
+
+                int colorWithAlpha = (alpha << 24) | (red << 16) | (green << 8) | blue;
+
+                bi.setRGB(column, row, colorWithAlpha);
+            }
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Ay, carrumba! Couldn't write '" + fileName + "'", e);
-        }
+
+        FileUtils.saveImageToFile(bi, "solved_maze.PNG");
+        return bi;
     }
 }

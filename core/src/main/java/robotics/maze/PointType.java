@@ -1,11 +1,14 @@
-package robotics.maze.robotics.projection;
+package robotics.maze;
 
 public enum PointType
 {
     EMPTY(0),
-    WALL(1),
-    START(2),
-    STOP(3),;
+    CORNER(1),
+    WALL(2),
+    START(3),
+    FINISH(4),
+    VISITED(5),
+    PATH(6);
 
     private final int colorId;
 
@@ -26,11 +29,17 @@ public enum PointType
             case 0:
                 return EMPTY;
             case 1:
-                return WALL;
+                return CORNER;
             case 2:
-                return START;
+                return WALL;
             case 3:
-                return STOP;
+                return START;
+            case 4:
+                return FINISH;
+            case 5:
+                return VISITED;
+            case 6:
+                return PATH;
         }
         throw new IllegalArgumentException("Unknown colorId passed:" + colorId);
     }

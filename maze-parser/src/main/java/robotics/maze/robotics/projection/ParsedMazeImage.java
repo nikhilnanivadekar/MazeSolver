@@ -5,6 +5,7 @@ import org.eclipse.collections.api.list.ListIterable;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import robotics.maze.PointType;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -22,23 +23,23 @@ public class ParsedMazeImage
         this.mazeFeatures = new MazeFeature[newImageHeight][newImageWidth];
     }
 
-    public MazeFeature createAndSetFeature(int column, int row, FeatureType featureType)
+    public MazeFeature createAndSetFeature(int column, int row, PointType PointType)
     {
-        this.mazeFeatures[row][column] = new MazeFeature(column, row, featureType);
+        this.mazeFeatures[row][column] = new MazeFeature(column, row, PointType);
         return this.mazeFeatures[row][column];
     }
 
-    public MazeFeature findAnyNeighbor(int x, int y, final FeatureType featureType)
+    public MazeFeature findAnyNeighbor(int x, int y, PointType PointType)
     {
-        return this.findAnyMatchingNeighbor(x, y, other -> featureType == other);
+        return this.findAnyMatchingNeighbor(x, y, other -> PointType == other);
     }
 
-    public MazeFeature findAnyNeighborNot(int x, int y, FeatureType featureType)
+    public MazeFeature findAnyNeighborNot(int x, int y, PointType PointType)
     {
-        return this.findAnyMatchingNeighbor(x, y, other -> featureType != other);
+        return this.findAnyMatchingNeighbor(x, y, other -> PointType != other);
     }
 
-    private MazeFeature findAnyMatchingNeighbor(int x, int y, Predicate<FeatureType> condition)
+    private MazeFeature findAnyMatchingNeighbor(int x, int y, Predicate<PointType> condition)
     {
         MazeFeature found = null;
 
@@ -60,21 +61,21 @@ public class ParsedMazeImage
             PrimitiveTuples.pair(+1, -1), PrimitiveTuples.pair(+1, 0), PrimitiveTuples.pair(+1, +1)
             );
 
-    public FeatureType getCommonFeatureTypeAround(int row, int column, int radius)
+    public PointType getCommonPointTypeAround(int row, int column, int radius)
     {
-        Optional<FeatureType> popularFeature = neighbourhood
+        Optional<PointType> popularFeature = neighbourhood
                 .asLazy()
                 .collect(each -> this.getFeatureAt(row + each.getOne()*radius, column + each.getTwo()*radius))
                 .reject(Objects::isNull)
                 .collect(MazeFeature::getType)
-                .reject(each -> each == FeatureType.EMPTY)
+                .reject(each -> each == PointType.EMPTY)
                 .toSortedBag()
                 .getFirstOptional();
 
-        return popularFeature.orElse(FeatureType.EMPTY);
+        return popularFeature.orElse(PointType.EMPTY);
     }
 
-    private MazeFeature getMatchingFeatureOrNull(int x, int y, Predicate<FeatureType> condition)
+    private MazeFeature getMatchingFeatureOrNull(int x, int y, Predicate<PointType> condition)
     {
         if (this.goodCoordinates(x, y))
         {

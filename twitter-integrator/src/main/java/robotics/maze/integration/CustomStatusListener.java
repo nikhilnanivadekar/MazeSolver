@@ -1,13 +1,17 @@
 package robotics.maze.integration;
 
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.stack.MutableStack;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.utility.ArrayIterate;
+import robotics.maze.FileUtils;
+import robotics.maze.dijkstra.DijkstraAlgorithm;
 import robotics.maze.dijkstra.MazeMapToVertexListAdapter;
 import robotics.maze.dijkstra.Vertex;
 import robotics.maze.robotics.image.JpegImageWrapper;
 import robotics.maze.robotics.projection.MazeMap;
 import robotics.maze.robotics.projection.MazeParser;
 import robotics.maze.robotics.projection.MazeParserRunner;
-import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.utility.ArrayIterate;
 import twitter4j.Logger;
 import twitter4j.MediaEntity;
 import twitter4j.StallWarning;
@@ -16,6 +20,7 @@ import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
 
 import java.io.File;
+import java.util.Set;
 
 public class CustomStatusListener implements StatusListener
 {
@@ -38,7 +43,7 @@ public class CustomStatusListener implements StatusListener
             if (mediaEntity != null)
             {
                 LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
-                File file = FileUtils.downloadAndSaveMedia(mediaEntity);
+                File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
                 JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
 
                 MazeParser mazeParser = new MazeParser();
@@ -48,6 +53,12 @@ public class CustomStatusListener implements StatusListener
                 MazeParserRunner.printMazeMap(mazeMap);
 
                 MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
+                pathVisitedVerticesPair.getTwo().forEach(each -> mazeMap.setVisited(each.getX(), each.getY()));
+                pathVisitedVerticesPair.getOne().each(each -> mazeMap.setPath(each.getX(), each.getY()));
+
+                MazeParser.writeSolvedMazeAsImage(mazeMap);
+
             }
         }
         catch (Exception e)

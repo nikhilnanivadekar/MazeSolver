@@ -1,5 +1,7 @@
 package robotics.maze.robotics.projection;
 
+import robotics.maze.PointType;
+
 public class MazeMap
 {
     private int[][] cells;
@@ -31,7 +33,17 @@ public class MazeMap
 
     public void setStop(int row, int col)
     {
-        this.cells[row][col] = PointType.STOP.getColorId();
+        this.cells[row][col] = PointType.FINISH.getColorId();
+    }
+
+    public void setPath(int row, int col)
+    {
+        this.cells[row][col] = PointType.PATH.getColorId();
+    }
+
+    public void setVisited(int row, int col)
+    {
+        this.cells[row][col] = PointType.VISITED.getColorId();
     }
 
     public int get(int row, int col)

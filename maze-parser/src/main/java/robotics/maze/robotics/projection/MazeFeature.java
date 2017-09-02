@@ -1,20 +1,22 @@
 package robotics.maze.robotics.projection;
 
+import robotics.maze.PointType;
+
 public class MazeFeature
 {
-    private FeatureType type;
+    private PointType type;
     private int tag = -1;
     private int x;
     private int y;
 
-    public MazeFeature(int newX, int newY, FeatureType newType)
+    public MazeFeature(int newX, int newY, PointType newType)
     {
         this.type = newType;
         this.x = newX;
         this.y = newY;
     }
 
-    public FeatureType getType()
+    public PointType getType()
     {
         return this.type;
     }

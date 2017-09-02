@@ -1,7 +1,7 @@
-package robotics.maze.integration;
+package robotics.maze;
 
-import twitter4j.MediaEntity;
-
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,9 +12,9 @@ import java.net.URL;
 
 public class FileUtils
 {
-    public static File downloadAndSaveMedia(MediaEntity mediaEntity) throws IOException
+    public static File downloadAndSaveMedia(String mediaUrl, long id) throws IOException
     {
-        InputStream in = new BufferedInputStream(new URL(mediaEntity.getMediaURL()).openStream());
+        InputStream in = new BufferedInputStream(new URL(mediaUrl).openStream());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buf = new byte[1024];
         int n = 0;
@@ -25,10 +25,22 @@ public class FileUtils
         out.close();
         in.close();
         byte[] response = out.toByteArray();
-        String fileName = mediaEntity.getId() + ".jpg";
+        String fileName = id + ".jpg";
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(response);
         fos.close();
         return new File(fileName);
+    }
+
+    public static void saveImageToFile(BufferedImage bi, String fileName)
+    {
+        try
+        {
+            ImageIO.write(bi, "PNG", new File(fileName));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Ay, carrumba! Couldn't write '" + fileName + "'", e);
+        }
     }
 }
