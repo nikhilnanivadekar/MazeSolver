@@ -9,6 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="core" />
         <module name="distribution" />
+        <module name="lejos" />
+        <module name="lejos-jar-builder" />
         <module name="maze-parser" />
         <module name="motion-planning" />
         <module name="twitter-integrator" />
@@ -17,6 +19,8 @@
     <bytecodeTargetLevel>
       <module name="core" target="1.5" />
       <module name="distribution" target="1.5" />
+      <module name="lejos" target="1.5" />
+      <module name="lejos-jar-builder" target="1.5" />
       <module name="maze-parser" target="1.8" />
       <module name="MazeSolver" target="1.5" />
       <module name="motion-planning" target="1.8" />

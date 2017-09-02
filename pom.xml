@@ -13,6 +13,11 @@
 
 
     <modules>
+        <!--
+        Always keep jar builder as the first module.
+        We need all jars to be installed before working with the project.
+        -->
+        <module>lejos-jar-builder</module>
         <module>core</module>
         <module>maze-parser</module>
         <module>twitter-integrator</module>
