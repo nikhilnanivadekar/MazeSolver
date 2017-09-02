@@ -1,12 +1,15 @@
 package robotics.maze.dijkstra;
 
-import robotics.maze.robotics.projection.PointType;
+import org.eclipse.collections.api.set.MutableSet;
+import org.eclipse.collections.impl.factory.Sets;
+import robotics.maze.PointType;
 
 public class Vertex
 {
     private final int x;
     private final int y;
     private final PointType pointType;
+    private MutableSet<Vertex> neighbors = Sets.mutable.withInitialCapacity(4);
 
     public Vertex(int x, int y, PointType pointType)
     {
@@ -30,35 +33,13 @@ public class Vertex
         return pointType;
     }
 
-    @Override
-    public boolean equals(Object o)
+    public MutableSet<Vertex> getNeighbors()
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Vertex vertex = (Vertex) o;
-
-        if (x != vertex.x) return false;
-        if (y != vertex.y) return false;
-        return pointType == vertex.pointType;
+        return neighbors;
     }
 
-    @Override
-    public int hashCode()
+    public void addNeighbor(Vertex neighbor)
     {
-        int result = x;
-        result = 31 * result + y;
-        result = 31 * result + pointType.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Vertex(" +
-                "x=" + x +
-                ", y=" + y +
-                ", pointType=" + pointType +
-                ')';
+        this.neighbors.add(neighbor);
     }
 }

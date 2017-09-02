@@ -1,132 +1,114 @@
 package robotics.maze.dijkstra;
 
-import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.api.map.primitive.MutableObjectDoubleMap;
+import org.eclipse.collections.api.set.MutableSet;
+import org.eclipse.collections.api.stack.MutableStack;
+import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Sets;
+import org.eclipse.collections.impl.factory.Stacks;
+import org.eclipse.collections.impl.factory.primitive.ObjectDoubleMaps;
+import org.eclipse.collections.impl.tuple.Tuples;
+import robotics.maze.PointType;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class DijkstraAlgorithm
 {
-    private final List<Vertex> vertices;
-    private final List<Edge> edges;
-    private final Set<Vertex> settledNodes = Sets.mutable.empty();
-    private final Set<Vertex> unsettledNodes = Sets.mutable.empty();
-    private final Map<Vertex, Vertex> predecessors = Maps.mutable.empty();
-    private final Map<Vertex, Long> distanceFromSource = Maps.mutable.empty();
-
-    public DijkstraAlgorithm(Graph graph)
+    public static Pair<MutableStack<Vertex>, Set<Vertex>> findPath(MutableList<Vertex> vertices)
     {
-        vertices = Lists.mutable.withAll(graph.getVertices());
-        edges = Lists.mutable.withAll(graph.getEdges());
-    }
-
-    public void calculateDistanceFromSource(Vertex source)
-    {
-        initialize(source);
-
-        while (unsettledNodes.size() > 0)
+        Vertex start = vertices.detect(each -> PointType.START == each.getPointType());
+        Vertex end = vertices.detect(each -> PointType.FINISH == each.getPointType());
+        if (start == null)
         {
-            Vertex node = getMinimumUnsettledNode();
-            settledNodes.add(node);
-            unsettledNodes.remove(node);
-            updateMinimumDistanceFromSource(node);
+            throw new IllegalStateException("No start point specified!");
         }
-    }
-
-    private void initialize(Vertex source)
-    {
-        for (Vertex vertex : vertices)
+        if (end == null)
         {
-            distanceFromSource.put(vertex, Long.MAX_VALUE);
+            throw new IllegalStateException("No end point specified!");
         }
-        distanceFromSource.put(source, Long.valueOf(0));
-        unsettledNodes.add(source);
-    }
-
-    private Vertex getMinimumUnsettledNode()
-    {
-        Vertex minimumUnsettledNode = null;
-
-        for (Vertex vertex : unsettledNodes)
+        if (start == end)
         {
-            if (null == minimumUnsettledNode)
+            System.out.println("Start Point = End Point NOTHING to do!");
+        }
+
+        MutableObjectDoubleMap<Vertex> vertexCostMap = ObjectDoubleMaps.mutable.empty();
+        vertices.each(each -> vertexCostMap.put(each, Double.MAX_VALUE));
+        MutableMap<Vertex, Vertex> vertexBackPointerMap = Maps.mutable.empty();
+        Set<Vertex> visitedVertices = Sets.mutable.with(start);
+        MutableSet<Vertex> verticesToSearch = Sets.mutable.with(start);
+
+        boolean reachedGoal = false;
+        vertexCostMap.put(start, 0);
+
+        while (!reachedGoal && verticesToSearch.notEmpty())
+        {
+            Vertex searchVertex = verticesToSearch.minBy(vertexCostMap::get);
+            if (end == searchVertex)
             {
-                minimumUnsettledNode = vertex;
+                reachedGoal = true;
             }
             else
             {
-                if (distanceFromSource.get(vertex) < distanceFromSource.get(minimumUnsettledNode))
+                visitedVertices.add(searchVertex);
+                MutableSet<Vertex> neighbors = searchVertex.getNeighbors();
+
+                neighbors.forEachWith((neighbor, finish) ->
                 {
-                    minimumUnsettledNode = vertex;
+                    if (!visitedVertices.contains(neighbor))
+                    {
+                        double costToSuccessor = vertexCostMap.get(searchVertex) + DijkstraAlgorithm.getCost(searchVertex, neighbor);
+                        if (vertexCostMap.get(neighbor) >= costToSuccessor)
+                        {
+                            vertexCostMap.put(neighbor, costToSuccessor);
+                            vertexBackPointerMap.put(neighbor, searchVertex);
+                        }
+                        if (!verticesToSearch.contains(neighbor))
+                        {
+                            verticesToSearch.add(neighbor);
+                        }
+                    }
+                }, end);
+
+                verticesToSearch.remove(searchVertex);
+            }
+        }
+        MutableStack<Vertex> path = Stacks.mutable.empty();
+
+        boolean isPathComplete = false;
+        if (reachedGoal)
+        {
+            path.push(end);
+
+            while (!isPathComplete)
+            {
+                if (start == path.peek())
+                {
+                    isPathComplete = true;
+                }
+                else
+                {
+                    path.push(vertexBackPointerMap.get(path.peek()));
                 }
             }
         }
+        else
+        {
+            System.out.println("Could not find feasible path between Start and End");
+            throw new IllegalStateException("Could not find feasible path between Start and End");
+        }
 
-        return minimumUnsettledNode;
+        return Tuples.pair(path, visitedVertices);
     }
 
-    private void updateMinimumDistanceFromSource(Vertex node)
+    public static double getCost(Vertex currentVertex, Vertex successor)
     {
-        List<Vertex> unsettledNeighbours = getUnsettledNeighbours(node);
-        for (Vertex unsettledNeighbour : unsettledNeighbours)
-        {
-            if (distanceFromSource.get(unsettledNeighbour) > distanceFromSource.get(node) + getDistance(node, unsettledNeighbour))
-            {
-                distanceFromSource.put(unsettledNeighbour, distanceFromSource.get(node) + getDistance(node, unsettledNeighbour));
-                predecessors.put(unsettledNeighbour, node);
-                unsettledNodes.add(unsettledNeighbour);
-            }
-        }
-    }
-
-    private List<Vertex> getUnsettledNeighbours(Vertex node)
-    {
-        List<Vertex> unsettledNeighbours = Lists.mutable.empty();
-
-        for (Edge edge : edges)
-        {
-            if (edge.getSource().equals(node) && !settledNodes.contains(edge.getDestination()))
-            {
-                unsettledNeighbours.add(edge.getDestination());
-            }
-        }
-
-        return unsettledNeighbours;
-    }
-
-    private long getDistance(Vertex source, Vertex target)
-    {
-        for (Edge edge : edges)
-        {
-            if (edge.getSource().equals(source) && edge.getDestination().equals(target))
-            {
-                return edge.getWeight();
-            }
-        }
-        throw new RuntimeException("Was not able to find distance");
-    }
-
-    public List<Vertex> getPath(Vertex target)
-    {
-        List<Vertex> path = Lists.mutable.empty();
-        Vertex step = target;
-        // check if a path exists
-        if (predecessors.get(step) == null)
-        {
-            return null;
-        }
-        path.add(step);
-        while (predecessors.get(step) != null)
-        {
-            step = predecessors.get(step);
-            path.add(step);
-        }
-        // Put it into the correct order
-        Collections.reverse(path);
-        return path;
+        int x = currentVertex.getX();
+        int successorX = successor.getX();
+        int y = currentVertex.getY();
+        int successorY = successor.getY();
+        return Math.sqrt(((successorY - y) * (successorY - y)) + ((successorX - x) * (successorX - x)));
     }
 }
