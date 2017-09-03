@@ -2,12 +2,16 @@ package robotics.maze.dijkstra;
 
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
-import robotics.maze.PointType;
-import robotics.maze.robotics.projection.MazeMap;
+import robotics.maze.enums.PointType;
+import robotics.maze.projection.projection.MazeMap;
+
+import java.util.Map;
 
 public class MazeMapToVertexListAdapter
 {

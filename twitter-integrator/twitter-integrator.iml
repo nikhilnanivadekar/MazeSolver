@@ -12,11 +12,19 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="maze-parser" />
-    <orderEntry type="module" module-name="motion-planning" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections-api:8.2.0" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections:8.2.0" level="project" />
+    <orderEntry type="module" module-name="ev3integrator" />
+    <orderEntry type="library" name="Maven: lejos:commons-cli:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:dbusjava:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:ev3classes:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:ev3tools:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:jcommon:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:jfreechart:0.8.0-alpha" level="project" />
+    <orderEntry type="library" name="Maven: lejos:jsch-0.1.50:0.8.0-alpha" level="project" />
+    <orderEntry type="module" module-name="maze-parser" />
+    <orderEntry type="module" module-name="motion-planning" />
     <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-core:4.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-stream:4.0.4" level="project" />
   </component>

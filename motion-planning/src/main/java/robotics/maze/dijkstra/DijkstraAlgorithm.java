@@ -11,7 +11,7 @@ import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.factory.Stacks;
 import org.eclipse.collections.impl.factory.primitive.ObjectDoubleMaps;
 import org.eclipse.collections.impl.tuple.Tuples;
-import robotics.maze.PointType;
+import robotics.maze.enums.PointType;
 
 import java.util.Set;
 

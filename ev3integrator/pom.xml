@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>maze-solver</artifactId>
+        <groupId>robotics.maze</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ev3-integrator</artifactId>
+    <name>Lego Mindstorms EV3 Integrator</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>robotics.maze</groupId>
+            <artifactId>core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>dbusjava</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>ev3classes</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>ev3tools</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>jcommon</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>lejos</groupId>
+            <artifactId>jsch-0.1.50</artifactId>
+            <version>${lejos.version}</version>
+        </dependency>
+
+    </dependencies>
+</project>

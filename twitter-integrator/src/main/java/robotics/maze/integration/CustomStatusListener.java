@@ -4,14 +4,16 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.stack.MutableStack;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.utility.ArrayIterate;
-import robotics.maze.FileUtils;
+import robotics.maze.DifferentialMotor;
+import robotics.maze.Ev3Traverser;
 import robotics.maze.dijkstra.DijkstraAlgorithm;
 import robotics.maze.dijkstra.MazeMapToVertexListAdapter;
 import robotics.maze.dijkstra.Vertex;
-import robotics.maze.robotics.image.JpegImageWrapper;
-import robotics.maze.robotics.projection.MazeMap;
-import robotics.maze.robotics.projection.MazeParser;
-import robotics.maze.robotics.projection.MazeParserRunner;
+import robotics.maze.image.JpegImageWrapper;
+import robotics.maze.projection.MazeParser;
+import robotics.maze.projection.MazeParserRunner;
+import robotics.maze.projection.projection.MazeMap;
+import robotics.maze.utils.FileUtils;
 import twitter4j.Logger;
 import twitter4j.MediaEntity;
 import twitter4j.StallWarning;
@@ -20,15 +22,18 @@ import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 
 public class CustomStatusListener implements StatusListener
 {
     private static final Logger LOGGER = Logger.getLogger(CustomStatusListener.class);
 
-    public CustomStatusListener()
-    {
+    private final DifferentialMotor pilot;
 
+    public CustomStatusListener(DifferentialMotor pilot)
+    {
+        this.pilot = pilot;
     }
 
     @Override
@@ -36,29 +41,30 @@ public class CustomStatusListener implements StatusListener
     {
         try
         {
-            LOGGER.info("@" + status.getUser().getScreenName() + " - " + status.getText());
-
-            MediaEntity mediaEntity = ArrayIterate.getFirst(status.getMediaEntities());
-
-            if (mediaEntity != null)
+            if (!status.isRetweet())
             {
-                LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
-                File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
-                JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
+                LOGGER.info("@" + status.getUser().getScreenName() + " - " + status.getText());
 
-                MazeParser mazeParser = new MazeParser();
+                MediaEntity mediaEntity = ArrayIterate.getFirst(status.getMediaEntities());
 
-                MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+                if (mediaEntity != null)
+                {
+                    LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
+                    File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
+                    JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
 
-                MazeParserRunner.printMazeMap(mazeMap);
+                    MazeParser mazeParser = new MazeParser();
 
-                MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-                Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
-                pathVisitedVerticesPair.getTwo().forEach(each -> mazeMap.setVisited(each.getX(), each.getY()));
-                pathVisitedVerticesPair.getOne().each(each -> mazeMap.setPath(each.getX(), each.getY()));
+                    MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
 
-                MazeParser.writeSolvedMazeAsImage(mazeMap);
+                    MazeParserRunner.printMazeMap(mazeMap);
 
+                    MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                    Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
+                    FileUtils.writeSolvedMaze(pathVisitedVerticesPair.getOne(), pathVisitedVerticesPair.getTwo(), mazeMap);
+                    List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(pathVisitedVerticesPair.getOne());
+                    Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
+                }
             }
         }
         catch (Exception e)

@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/MazeSolver.iml" filepath="$PROJECT_DIR$/MazeSolver.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/distribution/distribution.iml" filepath="$PROJECT_DIR$/distribution/distribution.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ev3integrator/ev3integrator.iml" filepath="$PROJECT_DIR$/ev3integrator/ev3integrator.iml" />
       <module fileurl="file://$PROJECT_DIR$/lejos-jar-builder/lejos-jar-builder.iml" filepath="$PROJECT_DIR$/lejos-jar-builder/lejos-jar-builder.iml" />
       <module fileurl="file://$PROJECT_DIR$/maze-parser/maze-parser.iml" filepath="$PROJECT_DIR$/maze-parser/maze-parser.iml" />
       <module fileurl="file://$PROJECT_DIR$/motion-planning/motion-planning.iml" filepath="$PROJECT_DIR$/motion-planning/motion-planning.iml" />
