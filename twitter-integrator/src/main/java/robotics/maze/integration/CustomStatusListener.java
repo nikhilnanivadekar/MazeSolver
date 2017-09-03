@@ -57,7 +57,7 @@ public class CustomStatusListener implements StatusListener
 
                     MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
 
-                    MazeParserRunner.printMazeMap(mazeMap);
+//                    MazeParserRunner.printMazeMap(mazeMap);
 
                     MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
                     Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);

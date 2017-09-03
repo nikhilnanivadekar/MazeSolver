@@ -1,6 +1,7 @@
 package robotics.maze;
 
 import robotics.maze.integration.CustomStatusListener;
+import robotics.maze.utils.Constants;
 import twitter4j.StatusListener;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
@@ -12,20 +13,17 @@ import java.util.Scanner;
 public class AppMain
 {
     private static final String HASH_TO_POLL = "nikhilev3";
-    private static final String EV3_IP_ADDRESS = "10.0.1.1";
-    private static final double WHEEL_DIAMETER = 33.0;
-    private static final double TRACK_WIDTH = 150.0;
 
     public static void main(String[] args) throws Exception
     {
         DifferentialMotor pilot = new DifferentialMotor(
-                WHEEL_DIAMETER,
-                TRACK_WIDTH,
+                Constants.WHEEL_DIAMETER,
+                Constants.TRACK_WIDTH,
                 "A",
                 "B",
-                100.0,
-                100.0,
-                EV3_IP_ADDRESS);
+                Constants.ROTATE_SPEED,
+                Constants.TRAVEL_SPEED,
+                Constants.EV3_IP_ADDRESS);
 
         Configuration build = AppMain.getConfiguration();
         TwitterStream twitterStream = new TwitterStreamFactory(build).getInstance();

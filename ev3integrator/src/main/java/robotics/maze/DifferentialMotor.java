@@ -2,12 +2,13 @@ package robotics.maze;
 
 import lejos.remote.ev3.RemoteRequestEV3;
 import lejos.remote.ev3.RemoteRequestPilot;
+import robotics.maze.utils.Constants;
 
 import java.io.IOException;
 
 public class DifferentialMotor
 {
-    private static final int TRAVERSAL_DISTANCE = 20;
+    private static final int TRAVERSAL_DISTANCE = 30;
 
     private final RemoteRequestPilot pilot;
     private final RemoteRequestEV3 ev3;
@@ -47,6 +48,14 @@ public class DifferentialMotor
 
     public void rotate(int angle)
     {
+        if (angle > 0)
+        {
+            angle += Constants.ANTICLOCKWISE_ROTATION_ADJUSTMENT;
+        }
+        if (angle < 0)
+        {
+            angle -= Constants.CLOCKWISE_ROTATION_ADJUSTMENT;
+        }
         this.pilot.rotate(angle);
     }
 }

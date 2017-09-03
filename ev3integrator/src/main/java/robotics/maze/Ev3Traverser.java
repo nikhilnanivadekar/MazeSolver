@@ -26,6 +26,7 @@ public class Ev3Traverser
     public static void moveAlongPath(DifferentialMotor pilot, List<Vertex> path) throws InterruptedException
     {
         HeadingType currentHeading = Ev3Traverser.goToStart(pilot, path.get(0));
+        Thread.sleep(5 * 1000);
 
         for (int i = 0; i < path.size() - 1; i++)
         {
@@ -53,11 +54,11 @@ public class Ev3Traverser
 
         if (xDist != 0)
         {
-            pilot.move(xDist);
+            pilot.move(Math.abs(xDist));
         }
         if (yDist != 0)
         {
-            pilot.move(yDist);
+            pilot.move(Math.abs(yDist));
         }
         return nextHeading;
     }
@@ -107,7 +108,7 @@ public class Ev3Traverser
         // Need to break in 2 parts
         if (startLocation.getX() != 0 && startLocation.getY() != 0)
         {
-            Vertex stop1 = new Vertex(0, startLocation.getY(), null);
+            Vertex stop1 = new Vertex(startLocation.getX(), 0, null);
             HeadingType currentHeading = Ev3Traverser.rotateAndMove(pilot, HeadingType.NEGATIVE_X, HOME, stop1);
             return Ev3Traverser.rotateAndMove(pilot, currentHeading, stop1, startLocation);
         }
