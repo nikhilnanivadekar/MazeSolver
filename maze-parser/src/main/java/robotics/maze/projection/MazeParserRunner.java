@@ -7,18 +7,13 @@ public class MazeParserRunner
 {
     public static void main(String[] args)
     {
-        String path = "";
-//        String fileName = "maze1_straight.jpg";
-//        String fileName = "maze1_perspective.jpg";
-//        String fileName = "maze3_topdown.jpg";
-//        String fileName = "maze3_perspective.jpg";
-//        String fileName = "maze3_perspective_extreme.jpg";
-//        String fileName = "maze5_perspective.jpg";
-        String fileName = "maze5_perspective_extreme.jpg";
-//        String fileName = "maze5_perspective_extreme_left.jpg";
-//        String fileName = "maze5_perspective_extreme_right.jpg";
+        if (args.length < 1)
+        {
+            System.out.println("Missing an image file name to parse");
+            return;
+        }
 
-        JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(path + fileName);
+        JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(args[0]);
 
         MazeParser mazeParser = new MazeParser();
 

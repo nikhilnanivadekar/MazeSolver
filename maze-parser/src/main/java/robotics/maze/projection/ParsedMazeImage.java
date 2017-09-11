@@ -1,14 +1,11 @@
 package robotics.maze.projection;
 
 import org.eclipse.collections.api.block.predicate.Predicate;
-import org.eclipse.collections.api.list.ListIterable;
-import org.eclipse.collections.api.tuple.primitive.IntIntPair;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.tuple.primitive.ObjectIntPair;
 import org.eclipse.collections.impl.factory.Lists;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import org.eclipse.collections.impl.list.Interval;
 import robotics.maze.enums.PointType;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class ParsedMazeImage
 {
@@ -55,24 +52,37 @@ public class ParsedMazeImage
         return found;
     }
 
-    static ListIterable<IntIntPair> neighbourhood = Lists.immutable.of(
-            PrimitiveTuples.pair(-1, -1), PrimitiveTuples.pair(-1, 0), PrimitiveTuples.pair(-1, +1),
-            PrimitiveTuples.pair( 0, -1), PrimitiveTuples.pair( 0, 0), PrimitiveTuples.pair( 0, +1),
-            PrimitiveTuples.pair(+1, -1), PrimitiveTuples.pair(+1, 0), PrimitiveTuples.pair(+1, +1)
-            );
-
-    public PointType getCommonPointTypeAround(int row, int column, int radius)
+    public PointType getCommonPointTypeInTheArea(int rowFrom, int rowTo, int colFrom, int colTo)
     {
-        Optional<PointType> popularFeature = neighbourhood
+        int area = (rowTo - rowFrom) * (colTo - colFrom);
+
+        MutableList<MazeFeature> neighbourhood = Lists.mutable.of();
+        for (int row = rowFrom; row < rowTo; row++)
+        {
+            for (int col = colFrom; col < colTo; col++)
+            {
+                neighbourhood.add(this.getFeatureAt(row, col));
+            }
+        }
+
+        Interval.fromTo(rowFrom, rowTo)
+                .flatCollect(
+                        row -> Interval.fromTo(colFrom, colTo)
+                                       .collect(col -> this.getFeatureAt(row, col)));
+
+        MutableList<ObjectIntPair<PointType>> popularFeature = neighbourhood
                 .asLazy()
-                .collect(each -> this.getFeatureAt(row + each.getOne()*radius, column + each.getTwo()*radius))
-                .reject(Objects::isNull)
                 .collect(MazeFeature::getType)
                 .reject(each -> each == PointType.EMPTY)
                 .toSortedBag()
-                .getFirstOptional();
+                .topOccurrences(1);
 
-        return popularFeature.orElse(PointType.EMPTY);
+        if (popularFeature.size() < 1)
+        {
+            return PointType.EMPTY;
+        }
+
+        return popularFeature.get(0).getTwo() * 20 > area ? popularFeature.get(0).getOne() : PointType.EMPTY;
     }
 
     private MazeFeature getMatchingFeatureOrNull(int x, int y, Predicate<PointType> condition)

@@ -19,6 +19,8 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static robotics.maze.enums.PointType.EMPTY;
+
 public class MazeParser
 {
     public MazeMap buildFromImage(ImageWrapper imageWrapper, int targetWidth, int targetHeight)
@@ -55,7 +57,7 @@ public class MazeParser
                 }
                 else
                 {
-                    parsedMaze.createAndSetFeature(column, row, PointType.EMPTY);
+                    parsedMaze.createAndSetFeature(column, row, EMPTY);
                 }
             }
         }
@@ -329,18 +331,25 @@ public class MazeParser
         }
         FileUtils.saveImageToFile(bi, "parsed_lined_maze.PNG");
 
-        double eighthOfGrid = Math.min(topLength, bottomLength) / (targetHeight * 8.0);
-
-        int radiusToCheck = eighthOfGrid < 1 ? 1 : (int) eighthOfGrid;
-
         for (int curRow = 0; curRow < targetHeight; curRow++)
         {
             for (int curCol = 0; curCol < targetWidth; curCol++)
             {
+                // determine the center of the area we want to check
+                // and the range of the area to check to determine dominant point type
                 int rowToCheck = (int) grid[curRow][curCol].getRow();
-                int colToCheck = (int) grid[curRow][curCol].getColumn();
+                int adjacentRow = (curRow == 0) ? 1 : curRow - 1;
+                int rowDelta = Math.max((int) Math.abs(grid[adjacentRow][curCol].getRow() - rowToCheck)/8, 1);
+                int rowFrom = Math.max(rowToCheck - rowDelta, 0);
+                int rowTo = Math.min(rowToCheck + rowDelta, imageHeight);
 
-                switch (parsedMaze.getCommonPointTypeAround(rowToCheck, colToCheck, radiusToCheck))
+                int colToCheck = (int) grid[curRow][curCol].getColumn();
+                int adjacentCol = (curCol == 0) ? 1 : curCol - 1;
+                int colDelta = Math.max((int) Math.abs(grid[curRow][adjacentCol].getColumn() - colToCheck)/8, 1);
+                int colFrom = Math.max(colToCheck - colDelta, 0);
+                int colTo = Math.min(colToCheck + colDelta, imageWidth);
+
+                switch (parsedMaze.getCommonPointTypeInTheArea(rowFrom, rowTo, colFrom, colTo))
 //                switch (parsedMaze.getFeatureAt(rowToCheck, colToCheck).getType())
                 {
                     case EMPTY:
