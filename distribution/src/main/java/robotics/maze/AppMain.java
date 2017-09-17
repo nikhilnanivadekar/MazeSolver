@@ -3,6 +3,8 @@ package robotics.maze;
 import robotics.maze.integration.CustomStatusListener;
 import robotics.maze.utils.Constants;
 import twitter4j.StatusListener;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.Configuration;
@@ -12,7 +14,7 @@ import java.util.Scanner;
 
 public class AppMain
 {
-    private static final String HASH_TO_POLL = "nikhilev3";
+    private static final String HASH_TO_POLL = "nikhilmaze";
 
     public static void main(String[] args) throws Exception
     {
@@ -25,9 +27,10 @@ public class AppMain
                 Constants.TRAVEL_SPEED,
                 Constants.EV3_IP_ADDRESS);
 
-        Configuration build = AppMain.getConfiguration();
-        TwitterStream twitterStream = new TwitterStreamFactory(build).getInstance();
-        StatusListener listener = new CustomStatusListener(pilot);
+        Configuration configuration = AppMain.getConfiguration();
+        TwitterStream twitterStream = new TwitterStreamFactory(configuration).getInstance();
+        Twitter twitter = new TwitterFactory(configuration).getInstance();
+        StatusListener listener = new CustomStatusListener(pilot, twitter);
 
         twitterStream.addListener(listener);
         twitterStream.filter(HASH_TO_POLL);
