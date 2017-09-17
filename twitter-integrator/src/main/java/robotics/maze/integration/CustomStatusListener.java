@@ -11,7 +11,6 @@ import robotics.maze.dijkstra.MazeMapToVertexListAdapter;
 import robotics.maze.dijkstra.Vertex;
 import robotics.maze.image.JpegImageWrapper;
 import robotics.maze.projection.MazeParser;
-import robotics.maze.projection.MazeParserRunner;
 import robotics.maze.projection.projection.MazeMap;
 import robotics.maze.utils.FileUtils;
 import twitter4j.Logger;
@@ -20,6 +19,8 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.StatusUpdate;
+import twitter4j.Twitter;
 
 import java.io.File;
 import java.util.List;
@@ -30,10 +31,13 @@ public class CustomStatusListener implements StatusListener
     private static final Logger LOGGER = Logger.getLogger(CustomStatusListener.class);
 
     private final DifferentialMotor pilot;
+    private final Twitter twitter;
+    private boolean isProcessing;
 
-    public CustomStatusListener(DifferentialMotor pilot)
+    public CustomStatusListener(DifferentialMotor pilot, Twitter twitter)
     {
         this.pilot = pilot;
+        this.twitter = twitter;
     }
 
     @Override
@@ -41,29 +45,71 @@ public class CustomStatusListener implements StatusListener
     {
         try
         {
-            if (!status.isRetweet())
+            if (!isProcessing)
             {
-                LOGGER.info("@" + status.getUser().getScreenName() + " - " + status.getText());
-
-                MediaEntity mediaEntity = ArrayIterate.getFirst(status.getMediaEntities());
-
-                if (mediaEntity != null)
+                if (!status.isRetweet())
                 {
-                    LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
-                    File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
-                    JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
+                    LOGGER.info("@" + status.getUser().getScreenName() + " - " + status.getText());
 
-                    MazeParser mazeParser = new MazeParser();
+                    MediaEntity mediaEntity = ArrayIterate.getFirst(status.getMediaEntities());
 
-                    MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+                    if (mediaEntity != null)
+                    {
+                        LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
+                        long startTime = System.currentTimeMillis();
+                        this.isProcessing = true;
+                        File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
+                        JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
+
+                        MazeParser mazeParser = new MazeParser();
+                        MazeMap mazeMap = null;
+                        try
+                        {
+                            mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+                        }
+                        catch (Exception e)
+                        {
+                            StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                    + " Unable to parse the maze!");
+                            statusUpdate.inReplyToStatusId(status.getId());
+                            twitter.updateStatus(statusUpdate);
+                        }
 
 //                    MazeParserRunner.printMazeMap(mazeMap);
+                        long mazeParsedTime = System.currentTimeMillis();
+                        if (mazeMap != null)
+                        {
 
-                    MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-                    Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
-                    FileUtils.writeSolvedMaze(pathVisitedVerticesPair.getOne(), pathVisitedVerticesPair.getTwo(), mazeMap);
-                    List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(pathVisitedVerticesPair.getOne());
-                    Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
+                            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                            Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = null;
+                            try
+                            {
+                                pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
+                            }
+                            catch (Exception e)
+                            {
+                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                        + " Unable to find feasible path!");
+                                statusUpdate.inReplyToStatusId(status.getId());
+                                twitter.updateStatus(statusUpdate);
+                            }
+                            if (pathVisitedVerticesPair != null)
+                            {
+
+                                File solvedMaze = FileUtils.writeSolvedMaze(pathVisitedVerticesPair.getOne(), pathVisitedVerticesPair.getTwo(), mazeMap);
+                                long mazeSolvedTime = System.currentTimeMillis();
+                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                        + " Solved your maze:" + mediaEntity.getId());
+                                statusUpdate.setMedia(solvedMaze);
+                                statusUpdate.inReplyToStatusId(status.getId());
+                                twitter.updateStatus(statusUpdate);
+
+                                List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(pathVisitedVerticesPair.getOne());
+                                Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
+                            }
+                        }
+                        this.isProcessing = false;
+                    }
                 }
             }
         }
