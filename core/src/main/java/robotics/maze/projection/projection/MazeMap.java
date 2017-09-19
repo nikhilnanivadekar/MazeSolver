@@ -2,11 +2,17 @@ package robotics.maze.projection.projection;
 
 import robotics.maze.enums.PointType;
 
+import java.awt.image.BufferedImage;
+
 public class MazeMap
 {
     private int[][] cells;
     private int width;
     private int height;
+
+    private BufferedImage mazeImage;
+
+    private CoordinatePoint[][] originalImageCoordinates;
 
     public MazeMap(int newWidth, int newHeight)
     {
@@ -59,5 +65,25 @@ public class MazeMap
     public int getHeight()
     {
         return height;
+    }
+
+    public BufferedImage getMazeImage()
+    {
+        return this.mazeImage;
+    }
+
+    public void setMazeImage(BufferedImage newMazeImage)
+    {
+        this.mazeImage = newMazeImage;
+    }
+
+    public CoordinatePoint[][] getOriginalImageCoordinates()
+    {
+        return originalImageCoordinates;
+    }
+
+    public void setOriginalImageCoordinates(CoordinatePoint[][] originalImageCoordinates)
+    {
+        this.originalImageCoordinates = originalImageCoordinates;
     }
 }

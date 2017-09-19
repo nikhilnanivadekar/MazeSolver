@@ -1,5 +1,7 @@
 package robotics.maze.image;
 
+import robotics.maze.projection.projection.CoordinatePoint;
+
 public class Line
 {
     private double m;

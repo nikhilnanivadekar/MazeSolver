@@ -2,6 +2,7 @@ package robotics.maze.image;
 
 import org.junit.Assert;
 import org.junit.Test;
+import robotics.maze.projection.projection.CoordinatePoint;
 
 public class IntersectionTest
 {

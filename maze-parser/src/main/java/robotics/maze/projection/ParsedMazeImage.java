@@ -52,7 +52,7 @@ public class ParsedMazeImage
         return found;
     }
 
-    public PointType getCommonPointTypeInTheArea(int rowFrom, int rowTo, int colFrom, int colTo)
+    public PointType getPredominantPointTypeInTheArea(int rowFrom, int rowTo, int colFrom, int colTo)
     {
         int area = (rowTo - rowFrom) * (colTo - colFrom);
 

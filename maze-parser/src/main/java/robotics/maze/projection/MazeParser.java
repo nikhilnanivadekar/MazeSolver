@@ -6,15 +6,12 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.block.factory.Comparators;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.tuple.Tuples;
+import robotics.maze.image.*;
+import robotics.maze.projection.projection.CoordinatePoint;
 import robotics.maze.utils.FileUtils;
 import robotics.maze.enums.PointType;
-import robotics.maze.image.CoordinatePoint;
-import robotics.maze.image.ImageWrapper;
-import robotics.maze.image.Line;
-import robotics.maze.image.MarkerColorRange;
 import robotics.maze.projection.projection.MazeMap;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -79,7 +76,8 @@ public class MazeParser
         }
 
 //        this.printParsedMaze(parsedMaze);
-        BufferedImage bi = this.writeParsedMazeAsImage(parsedMaze);
+        BufferedImage bi = MazeImageCreator.createImageFromParsedMaze(parsedMaze);
+        FileUtils.saveImageToFile(bi, "parsed_maze.PNG");
 
         if (cornerBoundaries.size() < 4)
         {
@@ -136,11 +134,6 @@ public class MazeParser
         CoordinatePoint[][] grid = new CoordinatePoint[targetHeight][targetWidth];
 
         // need to account for perspective distortion
-        double topLength = this.computeDistance(ulCenter, urCenter);
-        double bottomLength = this.computeDistance(llCenter, lrCenter);
-        double leftLength = this.computeDistance(ulCenter, llCenter);
-        double rightLength = this.computeDistance(urCenter, lrCenter);
-
         Line topEdge = new Line(ulCenter, urCenter);
         Line bottomEdge = new Line(llCenter, lrCenter);
 
@@ -170,8 +163,20 @@ public class MazeParser
 
         bottomPoints[targetWidth - 1] = rightPoints[targetHeight - 1] = new CoordinatePoint(lrCenter, 0.5);
 
+        MutableList<String> stats = Lists.mutable.of();
+
+        stats.add("=== ANALYSIS: MAZE ===");
+        stats.add(String.format("VSR %.4f" , verticalSlopeRatio));
+        stats.add(String.format("HSR %.4f" , horizontalSlopeRatio));
+        stats.add("UL " + ulCenter.toFormattedString());
+        stats.add("UR " + urCenter.toFormattedString());
+        stats.add("LL " + llCenter.toFormattedString());
+        stats.add("LR " + lrCenter.toFormattedString());
+
         if (verticalAlmostParallel && horizontalAlmostParallel)
         {
+            stats.add("VERTVP INF");
+            stats.add("HORZVP INF");
             // don't bother with perspective correction at all
             CoordinatePoint leftDeltaHeight = this.computeIncrement(ulCenter, llCenter, targetHeight - 1);
             CoordinatePoint rightDeltaHeight = this.computeIncrement(urCenter, lrCenter, targetHeight - 1);
@@ -205,6 +210,9 @@ public class MazeParser
         }
         else if (horizontalAlmostParallel)
         {
+            stats.add("VERTVP CALC");
+            stats.add("HORZVP INF");
+
             // no perspective correction for column (width) segments
             CoordinatePoint topDeltaWidth = this.computeIncrement(ulCenter, urCenter, targetWidth - 1);
             CoordinatePoint bottomDeltaWidth = this.computeIncrement(llCenter, lrCenter, targetWidth - 1);
@@ -234,6 +242,9 @@ public class MazeParser
         }
         else if (verticalAlmostParallel)
         {
+            stats.add("VERTVP INF");
+            stats.add("HORZVP CALS");
+
             // no perspective correction for rows
             CoordinatePoint leftDeltaHeight = this.computeIncrement(ulCenter, llCenter, targetHeight - 1);
             CoordinatePoint rightDeltaHeight = this.computeIncrement(urCenter, lrCenter, targetHeight - 1);
@@ -265,6 +276,9 @@ public class MazeParser
         {
             CoordinatePoint verticalVp = CoordinatePoint.intersection(ulCenter, llCenter, urCenter, lrCenter);
             CoordinatePoint horizontalVp = CoordinatePoint.intersection(ulCenter, urCenter, llCenter, lrCenter);
+
+            stats.add("VERTVP " + verticalVp.toFormattedString());
+            stats.add("HORZVP " + horizontalVp.toFormattedString());
 
             Line horizonLine = new Line(horizontalVp, verticalVp);
 
@@ -317,26 +331,21 @@ public class MazeParser
             }
         }
 
+        stats.add("GRD " + targetHeight + ":" + targetWidth);
+        MazeImageCreator.overlayGridOnImage(bi, grid);
+        MazeImageCreator.addTextToImage(bi, stats);
+        FileUtils.saveImageToFile(bi, "parsed_lined_maze.PNG");
+
         // converting to double for stepping and round on each step
         // to avoid accumulation of rounding errors
         // running on the left-right and top-bottom grid endpoints and checking intersections
 
         for (int curRow = 0; curRow < targetHeight; curRow++)
         {
-            drawLine(bi, grid[curRow][0], grid[curRow][targetWidth - 1]);
-        }
-        for (int curCol = 0; curCol < targetWidth; curCol++)
-        {
-            drawLine(bi, grid[0][curCol], grid[targetHeight - 1][curCol]);
-        }
-        FileUtils.saveImageToFile(bi, "parsed_lined_maze.PNG");
-
-        for (int curRow = 0; curRow < targetHeight; curRow++)
-        {
             for (int curCol = 0; curCol < targetWidth; curCol++)
             {
                 // determine the center of the area we want to check
-                // and the range of the area to check to determine dominant point type
+                // and the range of the area to check to determine the dominant point type
                 int rowToCheck = (int) grid[curRow][curCol].getRow();
                 int adjacentRow = (curRow == 0) ? 1 : curRow - 1;
                 int rowDelta = Math.max((int) Math.abs(grid[adjacentRow][curCol].getRow() - rowToCheck)/8, 1);
@@ -349,7 +358,7 @@ public class MazeParser
                 int colFrom = Math.max(colToCheck - colDelta, 0);
                 int colTo = Math.min(colToCheck + colDelta, imageWidth);
 
-                switch (parsedMaze.getCommonPointTypeInTheArea(rowFrom, rowTo, colFrom, colTo))
+                switch (parsedMaze.getPredominantPointTypeInTheArea(rowFrom, rowTo, colFrom, colTo))
 //                switch (parsedMaze.getFeatureAt(rowToCheck, colToCheck).getType())
                 {
                     case EMPTY:
@@ -357,7 +366,6 @@ public class MazeParser
                         break;
                     case CORNER:
                         result.setWall(curRow, curCol);
-//                        result.setEmpty(curRow, curCol);
                         break;
                     case WALL:
                         result.setWall(curRow, curCol);
@@ -371,6 +379,9 @@ public class MazeParser
                 }
             }
         }
+
+        result.setMazeImage(bi);
+        result.setOriginalImageCoordinates(grid);
 
         return result;
     }
@@ -386,13 +397,6 @@ public class MazeParser
         {
             return (b <= smallNumber) ? 1.0 : 0.0;
         }
-    }
-
-    private double computeDistance(CoordinatePoint p1, CoordinatePoint p2)
-    {
-        double r = p1.getRow() - p2.getRow();
-        double c = p1.getColumn() - p2.getColumn();
-        return Math.sqrt(r * r + c * c);
     }
 
     private ListIterable<MazeFeature> floodFill(ParsedMazeImage parsedMaze, int row, int column, int tag)
@@ -507,64 +511,5 @@ public class MazeParser
         );
 
         return Tuples.pair(almostCenter, maxDistance);
-    }
-
-    private void drawLine(BufferedImage bi, CoordinatePoint from, CoordinatePoint to)
-    {
-        Graphics g = bi.getGraphics();
-        g.setColor(Color.MAGENTA);
-        g.drawLine((int) from.getColumn(), (int) from.getRow(), (int) to.getColumn(), (int) to.getRow());
-    }
-
-    private BufferedImage writeParsedMazeAsImage(ParsedMazeImage parsedMaze)
-    {
-        int width = parsedMaze.getWidth();
-        int height = parsedMaze.getHeight();
-
-        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-        for (int row = 0; row < height; row++)
-        {
-            for (int column = 0; column < width; column++)
-            {
-                int red = 0;
-                int green = 0;
-                int blue = 0;
-                int alpha = 255;
-                switch (parsedMaze.getFeatureAt(row, column).getType())
-                {
-                    case EMPTY:
-                        red = green = blue = 255;
-                        break;
-                    case CORNER:
-                        red = 255;
-                        break;
-                    case WALL:
-                        break;
-                    case START:
-                        green = 255;
-                        break;
-                    case FINISH:
-                        blue = 255;
-                        break;
-                    case VISITED:
-                        red = 255;
-                        green = 255;
-                        blue = 224;
-                        break;
-                    case PATH:
-                        red = 34;
-                        green = 139;
-                        blue = 34;
-                }
-
-                int colorWithAlpha = (alpha << 24) | (red << 16) | (green << 8) | blue;
-
-                bi.setRGB(column, row, colorWithAlpha);
-            }
-        }
-
-        FileUtils.saveImageToFile(bi, "parsed_maze.PNG");
-        return bi;
     }
 }

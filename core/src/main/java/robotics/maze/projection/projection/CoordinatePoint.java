@@ -1,4 +1,4 @@
-package robotics.maze.image;
+package robotics.maze.projection.projection;
 
 public class CoordinatePoint
 {
@@ -53,6 +53,11 @@ public class CoordinatePoint
     public String toString()
     {
         return "{" + this.row + ", " + this.column + '}';
+    }
+
+    public String toFormattedString()
+    {
+        return String.format("[%.4f:%.4f]", this.row, this.column);
     }
 
     public CoordinatePoint incrementBy(CoordinatePoint delta)

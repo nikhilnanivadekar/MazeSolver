@@ -2,8 +2,7 @@ package robotics.maze.image;
 
 import org.junit.Assert;
 import org.junit.Test;
-import robotics.maze.image.CoordinatePoint;
-import robotics.maze.image.Line;
+import robotics.maze.projection.projection.CoordinatePoint;
 
 public class LineTest
 {
