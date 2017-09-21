@@ -8,12 +8,7 @@ import robotics.maze.projection.projection.MazeMap;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Set;
 
@@ -44,16 +39,19 @@ public class FileUtils
         try
         {
             File output = new File(fileName);
+            boolean cache = ImageIO.getUseCache();
+            ImageIO.setUseCache(false);
             ImageIO.write(bi, "PNG", output);
+            ImageIO.setUseCache(cache);
             return output;
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Ay, carrumba! Couldn't write '" + fileName + "'", e);
+            throw new RuntimeException("Failed to write to file'" + fileName + "' because of " + e.getMessage(), e);
         }
     }
 
-    public static File writeSolvedMaze(MutableStack<Vertex> path, Set<Vertex> visitedVertices, MazeMap mazeMap)
+    public static void writeSolvedMaze(MutableStack<Vertex> path, Set<Vertex> visitedVertices, MazeMap mazeMap)
     {
         FileUtils.markMazeMapWithVisitedVertices(visitedVertices, mazeMap);
         FileUtils.markMazeMapWithPath(path, mazeMap);
@@ -110,7 +108,7 @@ public class FileUtils
         bGr.drawImage(scaledInstance, 0, 0, null);
         bGr.dispose();
 
-        return FileUtils.saveImageToFile(bufferedImage, "solved_maze.PNG");
+       FileUtils.saveImageToFile(bufferedImage, "solved_maze.PNG");
     }
 
     private static void markMazeMapWithPath(MutableStack<Vertex> path, MazeMap mazeMap)

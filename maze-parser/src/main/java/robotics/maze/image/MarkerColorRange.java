@@ -1,5 +1,9 @@
 package robotics.maze.image;
 
+import static robotics.maze.image.ImageWrapper.BLUE;
+import static robotics.maze.image.ImageWrapper.GREEN;
+import static robotics.maze.image.ImageWrapper.RED;
+
 public enum MarkerColorRange
 {
     CORNER_MARKER(340, 15, (h, s, l) -> canTellWhatColor(s, l)), // mostly red
@@ -39,6 +43,11 @@ public enum MarkerColorRange
         this.hueTo = newHueTo;
 
         this.constraint = newHslContraint;
+    }
+
+    public boolean checkRGB(int[] rgb)
+    {
+        return this.checkRGB(rgb[RED], rgb[GREEN], rgb[BLUE]);
     }
 
     public boolean checkRGB(int red, int green, int blue)

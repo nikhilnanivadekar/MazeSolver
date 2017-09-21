@@ -1,10 +1,12 @@
 package robotics.maze.image;
 
 import org.eclipse.collections.api.list.ListIterable;
-import org.eclipse.collections.api.map.primitive.MutableObjectIntMap;
+import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
+import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.primitive.ObjectIntMaps;
 import robotics.maze.enums.PointType;
+import robotics.maze.projection.MazeFeature;
 import robotics.maze.projection.ParsedMazeImage;
 import robotics.maze.projection.projection.CoordinatePoint;
 
@@ -25,25 +27,25 @@ public class MazeImageCreator
                 .setTexColor(Color.BLACK)
                 .setGridLineColor(Color.MAGENTA)
                 .setFont(new Font("Consolas", Font.BOLD, 10))
-                .colorForType(EMPTY,   toIntRgb(255, 255, 255))
-                .colorForType(CORNER,  toIntRgb(255,   0,   0))
-                .colorForType(WALL,    toIntRgb(  0,   0,   0))
-                .colorForType(START,   toIntRgb(  0, 255,   0))
-                .colorForType(FINISH,  toIntRgb(  0,   0, 255))
-                .colorForType(VISITED, toIntRgb(255, 255, 224))
-                .colorForType(PATH,    toIntRgb( 34, 139,  34));
+                .colorForType(EMPTY,   new ColorDescriptor(255, 255, 255))
+                .colorForType(CORNER,  new ColorDescriptor(255,   0,   0))
+                .colorForType(WALL,    new ColorDescriptor(  0,   0,   0))
+                .colorForType(START,   new ColorDescriptor(  0, 255,   0))
+                .colorForType(FINISH,  new ColorDescriptor(  0,   0, 255))
+                .colorForType(VISITED, new ColorDescriptor(255, 255, 224))
+                .colorForType(PATH,    new ColorDescriptor( 34, 139,  34));
 
         roboVisionPalette = new MazeImagePalette()
                 .setTexColor(Color.WHITE ) // 237, 238, 239
                 .setGridLineColor(Color.WHITE)
                 .setFont(new Font("Consolas", Font.BOLD, 10))
-                .colorForType(EMPTY,   toIntRgb(212,  13,   0))
-                .colorForType(CORNER,  toIntRgb(225, 126, 110))
-                .colorForType(WALL,    toIntRgb( 43,   9,  15))
-                .colorForType(START,   toIntRgb( 83,  24,  30))
-                .colorForType(FINISH,  toIntRgb(139,  10,  10))
-                .colorForType(VISITED, toIntRgb(255, 255, 224))
-                .colorForType(PATH,    toIntRgb(255, 225, 233));
+                .colorForType(EMPTY,   new ColorDescriptor(212,  13,   0))
+                .colorForType(CORNER,  new ColorDescriptor(225, 126, 110))
+                .colorForType(WALL,    new ColorDescriptor( 43,   9,  15))
+                .colorForType(START,   new ColorDescriptor( 83,  24,  30))
+                .colorForType(FINISH,  new ColorDescriptor(139,  10,  10))
+                .colorForType(VISITED, new ColorDescriptor(255, 255, 224))
+                .colorForType(PATH,    new ColorDescriptor(255, 225, 233));
 
         selectedPalette = defaultPalette;
     }
@@ -69,21 +71,39 @@ public class MazeImageCreator
         int width = parsedMaze.getWidth();
         int height = parsedMaze.getHeight();
 
-        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
         for (int row = 0; row < height; row++)
         {
             for (int column = 0; column < width; column++)
             {
-                PointType pointType = parsedMaze.getFeatureAt(row, column).getType();
+                MazeFeature feature = parsedMaze.getFeatureAt(row, column);
+                PointType pointType = feature.getType();
 
-                bi.setRGB(column, row, selectedPalette.getColorForType(pointType));
+                ColorDescriptor colorDescriptor = selectedPalette.getColorDescriptorForType(pointType);
+
+                if (pointType == EMPTY)
+                {
+                    int shading = feature.getShading();
+
+                    int newRed = colorDescriptor.getRed() - shading;
+                    int newGreen = colorDescriptor.getGreen() - shading;
+                    int newBlue = colorDescriptor.getBlue() - shading;
+
+                    bi.setRGB(column, row, toIntRgb(
+                            newRed > 0 ? newRed : 0,
+                            newGreen > 0 ? newGreen : 0,
+                            newBlue > 0 ? newBlue : 0));
+                }
+                else
+                {
+                    bi.setRGB(column, row, colorDescriptor.getColorAsInt());
+                }
             }
         }
 
         return bi;
     }
-
 
     private static void drawLine(Graphics g, CoordinatePoint from, CoordinatePoint to)
     {
@@ -119,7 +139,25 @@ public class MazeImageCreator
         g.setColor(selectedPalette.getTextColor());
         g.setFont(font);
 
-        text.forEachWithIndex((s, i) -> g.drawString("0" + i + ": " + s, 20, (i+1)*lineHeight));
+        text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, 20, (i+1)*lineHeight));
+    }
+
+    public static void addRightTextToImage(BufferedImage bi, ListIterable<String> text)
+    {
+        Graphics g = bi.getGraphics();
+
+        int lineHeight = bi.getHeight()/50;
+        float fontHeight = (float) (0.8 * lineHeight);
+        Font font = selectedPalette.getFont().deriveFont(fontHeight);
+
+        g.setColor(selectedPalette.getTextColor());
+        g.setFont(font);
+
+        if (text.size() > 0)
+        {
+            int leftMargin = bi.getWidth() - g.getFontMetrics().stringWidth(text.get(0) + "000:00" )-20;
+            text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, leftMargin, (i + 1) * lineHeight));
+        }
     }
 
     public static void drawPathOnImage(BufferedImage bi, CoordinatePoint[][] grid, ListIterable<IntIntPair> pathPointsOnGrid)
@@ -146,7 +184,7 @@ public class MazeImageCreator
 
         private Font font;
 
-        private MutableObjectIntMap<PointType> mazeFeaturePalette = ObjectIntMaps.mutable.of();
+        private MutableMap<PointType, ColorDescriptor> mazeFeaturePalette = Maps.mutable.of();
 
         public MazeImagePalette()
         {
@@ -170,7 +208,7 @@ public class MazeImageCreator
             return this;
         }
 
-        public MazeImagePalette colorForType(PointType pointType, int color)
+        public MazeImagePalette colorForType(PointType pointType, ColorDescriptor color)
         {
             this.mazeFeaturePalette.put(pointType, color);
             return this;
@@ -178,7 +216,7 @@ public class MazeImageCreator
 
         public int getColorForType(PointType pointType)
         {
-            return this.mazeFeaturePalette.get(pointType);
+            return this.mazeFeaturePalette.get(pointType).getColorAsInt();
         }
 
         public Color getTextColor()
@@ -194,6 +232,49 @@ public class MazeImageCreator
         public Font getFont()
         {
             return this.font;
+        }
+
+        public ColorDescriptor getColorDescriptorForType(PointType pointType)
+        {
+            return this.mazeFeaturePalette.get(pointType);
+        }
+    }
+
+    static private class ColorDescriptor
+    {
+        private int red;
+        private int green;
+        private int blue;
+
+        private int colorAsInt;
+
+        public ColorDescriptor(int newRed, int newGreen, int newBlue)
+        {
+            this.red = newRed;
+            this.green = newGreen;
+            this.blue = newBlue;
+
+            this.colorAsInt = toIntRgb(this.red, this.green, this.blue);
+        }
+
+        public int getRed()
+        {
+            return this.red;
+        }
+
+        public int getGreen()
+        {
+            return this.green;
+        }
+
+        public int getBlue()
+        {
+            return this.blue;
+        }
+
+        public int getColorAsInt()
+        {
+            return this.colorAsInt;
         }
     }
 }

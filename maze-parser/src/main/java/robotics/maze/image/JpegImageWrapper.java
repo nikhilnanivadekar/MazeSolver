@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class JpegImageWrapper
-        implements ImageWrapper
+implements ImageWrapper
 {
     private final int width;
     private final int height;
@@ -39,8 +39,22 @@ public class JpegImageWrapper
         return this.height;
     }
 
+    public void retrieveRgbAt(int x, int y, int rgb[])
+    {
+        int pos = (y * this.pixelLength * this.width) + (x * this.pixelLength);
+
+        if (this.hasAlphaChannel)
+        {
+            pos++;
+        }
+
+        rgb[BLUE] = (int) pixels[pos++] & 0xff; // blue
+        rgb[GREEN] = (int) pixels[pos++] & 0xff; // green
+        rgb[RED] = (int) pixels[pos++] & 0xff; // red
+    }
+
     @Override
-    public boolean pixelMatchesColorRange(int x, int y, MarkerColorRange colorRange)
+    public boolean rgbMatchesColorConstraints(int x, int y, MarkerColorRange colorRange)
     {
         int pos = (y * this.pixelLength * this.width) + (x * this.pixelLength);
 

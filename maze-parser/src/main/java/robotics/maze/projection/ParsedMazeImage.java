@@ -22,32 +22,33 @@ public class ParsedMazeImage
 
     public MazeFeature createAndSetFeature(int column, int row, PointType PointType)
     {
-        this.mazeFeatures[row][column] = new MazeFeature(column, row, PointType);
-        return this.mazeFeatures[row][column];
+        MazeFeature newFeature = new MazeFeature(column, row, PointType);
+        this.mazeFeatures[row][column] = newFeature;
+        return newFeature;
     }
 
-    public MazeFeature findAnyNeighbor(int x, int y, PointType PointType)
+    public MazeFeature findAnyNeighbor(int x, int y, PointType pointType)
     {
-        return this.findAnyMatchingNeighbor(x, y, other -> PointType == other);
+        return this.findAnyMatchingNeighbor(x, y, other -> pointType == other);
     }
 
-    public MazeFeature findAnyNeighborNot(int x, int y, PointType PointType)
+    public MazeFeature findAnyNeighborNot(int column, int row, PointType pointType)
     {
-        return this.findAnyMatchingNeighbor(x, y, other -> PointType != other);
+        return this.findAnyMatchingNeighbor(column, row, other -> pointType != other);
     }
 
-    private MazeFeature findAnyMatchingNeighbor(int x, int y, Predicate<PointType> condition)
+    private MazeFeature findAnyMatchingNeighbor(int column, int row, Predicate<PointType> condition)
     {
         MazeFeature found = null;
 
-        if (found == null) { found = this.getMatchingFeatureOrNull(x-1, y-1, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x+0, y-1, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x+1, y-1, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x-1, y+0, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x+1, y+0, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x-1, y+1, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x+0, y+1, condition); }
-        if (found == null) { found = this.getMatchingFeatureOrNull(x+1, y+1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column-1, row-1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column+0, row-1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column+1, row-1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column-1, row+0, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column+1, row+0, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column-1, row+1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column+0, row+1, condition); }
+        if (found == null) { found = this.getMatchingFeatureOrNull(column+1, row+1, condition); }
 
         return found;
     }
@@ -65,16 +66,11 @@ public class ParsedMazeImage
             }
         }
 
-        Interval.fromTo(rowFrom, rowTo)
-                .flatCollect(
-                        row -> Interval.fromTo(colFrom, colTo)
-                                       .collect(col -> this.getFeatureAt(row, col)));
-
         MutableList<ObjectIntPair<PointType>> popularFeature = neighbourhood
                 .asLazy()
                 .collect(MazeFeature::getType)
                 .reject(each -> each == PointType.EMPTY)
-                .toSortedBag()
+                .toBag()
                 .topOccurrences(1);
 
         if (popularFeature.size() < 1)
@@ -85,11 +81,11 @@ public class ParsedMazeImage
         return popularFeature.get(0).getTwo() * 20 > area ? popularFeature.get(0).getOne() : PointType.EMPTY;
     }
 
-    private MazeFeature getMatchingFeatureOrNull(int x, int y, Predicate<PointType> condition)
+    private MazeFeature getMatchingFeatureOrNull(int column, int row, Predicate<PointType> condition)
     {
-        if (this.goodCoordinates(x, y))
+        if (this.goodCoordinates(column, row))
         {
-            MazeFeature featureAtLocation = this.mazeFeatures[y][x];
+            MazeFeature featureAtLocation = this.mazeFeatures[row][column];
 
             if (featureAtLocation != null && condition.accept(featureAtLocation.getType()))
             {

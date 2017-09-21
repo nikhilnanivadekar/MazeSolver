@@ -16,8 +16,13 @@ implements ImageWrapper
     }
 
     @Override
-    public boolean pixelMatchesColorRange(int x, int y, MarkerColorRange colorRange)
+    public boolean rgbMatchesColorConstraints(int x, int y, MarkerColorRange colorRange)
     {
         return false;
+    }
+
+    @Override
+    public void retrieveRgbAt(int x, int y, int[] rgb)
+    {
     }
 }

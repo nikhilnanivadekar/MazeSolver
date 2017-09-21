@@ -2,18 +2,23 @@ package robotics.maze.projection;
 
 import robotics.maze.enums.PointType;
 
+import static robotics.maze.image.ImageWrapper.BLUE;
+import static robotics.maze.image.ImageWrapper.GREEN;
+import static robotics.maze.image.ImageWrapper.RED;
+
 public class MazeFeature
 {
     private PointType type;
     private int tag = -1;
-    private int x;
-    private int y;
+    private int shading = 0;
+    private int column;
+    private int row;
 
-    public MazeFeature(int newX, int newY, PointType newType)
+    public MazeFeature(int newColumn, int newRow, PointType newType)
     {
         this.type = newType;
-        this.x = newX;
-        this.y = newY;
+        this.column = newColumn;
+        this.row = newRow;
     }
 
     public PointType getType()
@@ -41,13 +46,23 @@ public class MazeFeature
         this.tag = newTag;
     }
 
-    public int getX()
+    public int getColumn()
     {
-        return this.x;
+        return this.column;
     }
 
-    public int getY()
+    public int getRow()
     {
-        return this.y;
+        return this.row;
+    }
+
+    public int getShading()
+    {
+        return this.shading;
+    }
+
+    public void setShading(int[] rgb)
+    {
+        this.shading = 255 - (rgb[RED] + rgb[GREEN] + rgb[BLUE]) / 3; // 255 - complementary; 3 - to average
     }
 }
