@@ -3,6 +3,7 @@ package robotics.maze.utils;
 import org.eclipse.collections.api.stack.MutableStack;
 import robotics.maze.dijkstra.Vertex;
 import robotics.maze.enums.PointType;
+import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.projection.projection.MazeMap;
 
 import javax.imageio.ImageIO;
@@ -47,7 +48,7 @@ public class FileUtils
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Failed to write to file'" + fileName + "' because of " + e.getMessage(), e);
+            throw new AmazeProcessingException("Failed to write to file'" + fileName + "' because of \"" + e.getMessage() +'"', e);
         }
     }
 

@@ -1,5 +1,7 @@
 package robotics.maze.image;
 
+import robotics.maze.exceptions.AmazeProcessingException;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -84,7 +86,8 @@ implements ImageWrapper
         }
         catch (IOException e)
         {
-            throw new RuntimeException("Unable to open file:" + file.getAbsolutePath(), e);
+            throw new AmazeProcessingException("Unable to open file: " + file.getAbsolutePath() +
+                    " because of \"" + e.getMessage() + '"', e);
         }
 
         return new JpegImageWrapper(image);

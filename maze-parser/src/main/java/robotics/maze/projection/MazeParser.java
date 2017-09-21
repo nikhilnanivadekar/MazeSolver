@@ -10,6 +10,7 @@ import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.image.*;
 import robotics.maze.projection.projection.CoordinatePoint;
 import robotics.maze.utils.FileUtils;
@@ -88,20 +89,21 @@ public class MazeParser
 
         Stopwatch.report("created baseline image");
 
-        if (cornerBoundaries.size() < 4)
-        {
-            throw new RuntimeException("Detected corner markers for " + cornerBoundaries.size() + " corners, 4 expected");
-        }
-
         /*cornerBoundaries.collect(this::findCenterAndDiameter)
                 .sortThis(Comparators.byFunction(Pair::getTwo, Comparators.reverseNaturalOrder()))
                 .forEach(each -> System.out.println(each.getOne() + " -- " + each.getTwo()));*/
 
         MutableList<CoordinatePoint> cornerCenters = cornerBoundaries
+                .select(boundary -> boundary.size() > 2)
                 .collect(this::findCenterAndDiameter)
                 .sortThisByLong(pair -> -pair.getTwo())
                 .take(4)
                 .collect(ObjectLongPair::getOne);
+
+        if (cornerCenters.size() < 4)
+        {
+            throw new AmazeProcessingException("Detected corner markers for " + cornerCenters.size() + " corners, 4 expected");
+        }
 
         Stopwatch.report("Selected 4 candidate corners");
 
@@ -355,10 +357,11 @@ public class MazeParser
 //        FileUtils.saveImageToFile(bi, "parsed_lined_maze.PNG");
 //        Stopwatch.report("grid written to file");
 
-        // converting to double for stepping and round on each step
-        // to avoid accumulation of rounding errors
-        // running on the left-right and top-bottom grid endpoints and checking intersections
+        boolean foundStart = false;
+        boolean foundFinish = false;
 
+        // converting to double for stepping and round on each step to avoid accumulation of rounding errors
+        // running on the left-right and top-bottom grid endpoints and checking intersections
         for (int curRow = 0; curRow < targetHeight; curRow++)
         {
             for (int curCol = 0; curCol < targetWidth; curCol++)
@@ -390,9 +393,11 @@ public class MazeParser
                         result.setWall(curRow, curCol);
                         break;
                     case START:
+                        foundStart = true;
                         result.setStart(curRow, curCol);
                         break;
                     case FINISH:
+                        foundFinish = true;
                         result.setStop(curRow, curCol);
                         break;
                 }
@@ -401,6 +406,13 @@ public class MazeParser
 
         result.setMazeImage(bi);
         result.setOriginalImageCoordinates(grid);
+
+        if (!(foundStart && foundFinish))
+        {
+            throw new AmazeProcessingException(
+                    (foundStart ? "" : "The start marker is missing. ") +
+                    (foundFinish ? "" : "The finish marker is missing."));
+        }
 
         return result;
     }
