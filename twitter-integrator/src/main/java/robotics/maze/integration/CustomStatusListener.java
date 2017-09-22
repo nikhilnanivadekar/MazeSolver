@@ -10,6 +10,7 @@ import robotics.maze.Ev3Traverser;
 import robotics.maze.dijkstra.DijkstraAlgorithm;
 import robotics.maze.dijkstra.MazeMapToVertexListAdapter;
 import robotics.maze.dijkstra.Vertex;
+import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.image.JpegImageWrapper;
 import robotics.maze.image.MazeImageCreator;
 import robotics.maze.projection.MazeParser;
@@ -59,68 +60,49 @@ public class CustomStatusListener implements StatusListener
                     if (mediaEntity != null)
                     {
                         LOGGER.info("Media Entity" + mediaEntity.getMediaURL());
-                        long startTime = System.currentTimeMillis();
                         this.isProcessing = true;
                         File file = FileUtils.downloadAndSaveMedia(mediaEntity.getMediaURL(), mediaEntity.getId());
                         JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(file);
-
-                        MazeParser mazeParser = new MazeParser();
-                        MazeMap mazeMap = null;
                         try
                         {
-                            mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+                            MazeParser mazeParser = new MazeParser();
+                            MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
+
+                            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                            MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
+
+                            for (int i = 0; i < this.palettesToUse.size(); i++)
+                            {
+                                if (this.palettesToUse.get(i) == 0)
+                                {
+                                    MazeImageCreator.useDefaultPalette();
+                                }
+                                if (this.palettesToUse.get(i) == 1)
+                                {
+                                    MazeImageCreator.useRoboVisionPalette();
+                                }
+                                MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
+                                        path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
+
+                                File solvedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
+                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                        + " Solved your maze:" + mediaEntity.getId());
+                                statusUpdate.setMedia(solvedMaze);
+                                statusUpdate.inReplyToStatusId(status.getId());
+                                twitter.updateStatus(statusUpdate);
+                            }
+
+                            List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
+                            Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
                         }
-                        catch (Exception e)
+                        catch (AmazeProcessingException e)
                         {
                             StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                    + " Unable to parse the maze!");
+                                    + e.getMessage());
                             statusUpdate.inReplyToStatusId(status.getId());
                             twitter.updateStatus(statusUpdate);
                         }
 
-                        if (mazeMap != null)
-                        {
-
-                            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-                            MutableStack<Vertex> path = null;
-                            try
-                            {
-                                path = DijkstraAlgorithm.findPath(vertices);
-                            }
-                            catch (Exception e)
-                            {
-                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                        + " Unable to find feasible path!");
-                                statusUpdate.inReplyToStatusId(status.getId());
-                                twitter.updateStatus(statusUpdate);
-                            }
-                            if (path != null)
-                            {
-                                for (int i = 0; i < this.palettesToUse.size(); i++)
-                                {
-                                    if (this.palettesToUse.get(i) == 0)
-                                    {
-                                        MazeImageCreator.useDefaultPalette();
-                                    }
-                                    if (this.palettesToUse.get(i) == 1)
-                                    {
-                                        MazeImageCreator.useRoboVisionPalette();
-                                    }
-                                    MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
-                                            path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
-
-                                    File solvedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
-                                    StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                            + " Solved your maze:" + mediaEntity.getId());
-                                    statusUpdate.setMedia(solvedMaze);
-                                    statusUpdate.inReplyToStatusId(status.getId());
-                                    twitter.updateStatus(statusUpdate);
-                                }
-
-                                List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
-                                Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
-                            }
-                        }
                         this.isProcessing = false;
                     }
                 }
