@@ -2,7 +2,6 @@ package robotics.maze.dijkstra;
 
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.stack.MutableStack;
-import org.eclipse.collections.api.tuple.Pair;
 import robotics.maze.DifferentialMotor;
 import robotics.maze.Ev3Traverser;
 import robotics.maze.image.JpegImageWrapper;
@@ -14,7 +13,6 @@ import robotics.maze.utils.FileUtils;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 public class TestMain
 {
@@ -29,11 +27,11 @@ public class TestMain
         MazeParserRunner.printMazeMap(mazeMap);
 
         MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-        Pair<MutableStack<Vertex>, Set<Vertex>> path = DijkstraAlgorithm.findPath(vertices);
+        MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
 
-        FileUtils.writeSolvedMaze(path.getOne(), path.getTwo(), mazeMap);
+        FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
 //        MazeParserRunner.printMazeMap(mazeMap);
-        List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path.getOne());
+        List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
 
         DifferentialMotor pilot = new DifferentialMotor(
                 Constants.WHEEL_DIAMETER,

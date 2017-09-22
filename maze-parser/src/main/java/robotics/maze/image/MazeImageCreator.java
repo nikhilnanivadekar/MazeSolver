@@ -4,7 +4,6 @@ import org.eclipse.collections.api.list.ListIterable;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.factory.primitive.ObjectIntMaps;
 import robotics.maze.enums.PointType;
 import robotics.maze.projection.MazeFeature;
 import robotics.maze.projection.ParsedMazeImage;
@@ -13,10 +12,9 @@ import robotics.maze.projection.projection.CoordinatePoint;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static robotics.maze.enums.PointType.*;
-
 public class MazeImageCreator
 {
+    // defaultPalette = 0, roboVisionPalette = 1
     static private MazeImagePalette defaultPalette;
     static private MazeImagePalette roboVisionPalette;
     static private MazeImagePalette selectedPalette;
@@ -27,25 +25,25 @@ public class MazeImageCreator
                 .setTexColor(Color.BLACK)
                 .setGridLineColor(Color.MAGENTA)
                 .setFont(new Font("Consolas", Font.BOLD, 10))
-                .colorForType(EMPTY,   new ColorDescriptor(255, 255, 255))
-                .colorForType(CORNER,  new ColorDescriptor(255,   0,   0))
-                .colorForType(WALL,    new ColorDescriptor(  0,   0,   0))
-                .colorForType(START,   new ColorDescriptor(  0, 255,   0))
-                .colorForType(FINISH,  new ColorDescriptor(  0,   0, 255))
-                .colorForType(VISITED, new ColorDescriptor(255, 255, 224))
-                .colorForType(PATH,    new ColorDescriptor( 34, 139,  34));
+                .colorForType(PointType.EMPTY, new ColorDescriptor(255, 255, 255))
+                .colorForType(PointType.CORNER, new ColorDescriptor(255, 0, 0))
+                .colorForType(PointType.WALL, new ColorDescriptor(0, 0, 0))
+                .colorForType(PointType.START, new ColorDescriptor(0, 255, 0))
+                .colorForType(PointType.FINISH, new ColorDescriptor(0, 0, 255))
+                .colorForType(PointType.VISITED, new ColorDescriptor(255, 255, 224))
+                .colorForType(PointType.PATH, new ColorDescriptor(34, 139, 34));
 
         roboVisionPalette = new MazeImagePalette()
-                .setTexColor(Color.WHITE ) // 237, 238, 239
+                .setTexColor(Color.WHITE) // 237, 238, 239
                 .setGridLineColor(Color.WHITE)
                 .setFont(new Font("Consolas", Font.BOLD, 10))
-                .colorForType(EMPTY,   new ColorDescriptor(212,  13,   0))
-                .colorForType(CORNER,  new ColorDescriptor(225, 126, 110))
-                .colorForType(WALL,    new ColorDescriptor( 43,   9,  15))
-                .colorForType(START,   new ColorDescriptor( 83,  24,  30))
-                .colorForType(FINISH,  new ColorDescriptor(139,  10,  10))
-                .colorForType(VISITED, new ColorDescriptor(255, 255, 224))
-                .colorForType(PATH,    new ColorDescriptor(255, 225, 233));
+                .colorForType(PointType.EMPTY, new ColorDescriptor(212, 13, 0))
+                .colorForType(PointType.CORNER, new ColorDescriptor(225, 126, 110))
+                .colorForType(PointType.WALL, new ColorDescriptor(43, 9, 15))
+                .colorForType(PointType.START, new ColorDescriptor(83, 24, 30))
+                .colorForType(PointType.FINISH, new ColorDescriptor(139, 10, 10))
+                .colorForType(PointType.VISITED, new ColorDescriptor(255, 255, 224))
+                .colorForType(PointType.PATH, new ColorDescriptor(255, 225, 233));
 
         selectedPalette = defaultPalette;
     }
@@ -82,7 +80,7 @@ public class MazeImageCreator
 
                 ColorDescriptor colorDescriptor = selectedPalette.getColorDescriptorForType(pointType);
 
-                if (pointType == EMPTY)
+                if (pointType == PointType.EMPTY)
                 {
                     int shading = feature.getShading();
 
@@ -132,21 +130,21 @@ public class MazeImageCreator
     {
         Graphics g = bi.getGraphics();
 
-        int lineHeight = bi.getHeight()/50;
+        int lineHeight = bi.getHeight() / 50;
         float fontHeight = (float) (0.8 * lineHeight);
         Font font = selectedPalette.getFont().deriveFont(fontHeight);
 
         g.setColor(selectedPalette.getTextColor());
         g.setFont(font);
 
-        text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, 20, (i+1)*lineHeight));
+        text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, 20, (i + 1) * lineHeight));
     }
 
     public static void addRightTextToImage(BufferedImage bi, ListIterable<String> text)
     {
         Graphics g = bi.getGraphics();
 
-        int lineHeight = bi.getHeight()/50;
+        int lineHeight = bi.getHeight() / 50;
         float fontHeight = (float) (0.8 * lineHeight);
         Font font = selectedPalette.getFont().deriveFont(fontHeight);
 
@@ -155,7 +153,7 @@ public class MazeImageCreator
 
         if (text.size() > 0)
         {
-            int leftMargin = bi.getWidth() - g.getFontMetrics().stringWidth(text.get(0) + "000:00" )-20;
+            int leftMargin = bi.getWidth() - g.getFontMetrics().stringWidth(text.get(0) + "000:00") - 20;
             text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, leftMargin, (i + 1) * lineHeight));
         }
     }

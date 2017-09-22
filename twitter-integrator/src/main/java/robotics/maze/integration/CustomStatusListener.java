@@ -1,8 +1,9 @@
 package robotics.maze.integration;
 
 import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.stack.MutableStack;
-import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 import robotics.maze.DifferentialMotor;
 import robotics.maze.Ev3Traverser;
@@ -10,6 +11,7 @@ import robotics.maze.dijkstra.DijkstraAlgorithm;
 import robotics.maze.dijkstra.MazeMapToVertexListAdapter;
 import robotics.maze.dijkstra.Vertex;
 import robotics.maze.image.JpegImageWrapper;
+import robotics.maze.image.MazeImageCreator;
 import robotics.maze.projection.MazeParser;
 import robotics.maze.projection.projection.MazeMap;
 import robotics.maze.utils.FileUtils;
@@ -24,7 +26,6 @@ import twitter4j.Twitter;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 public class CustomStatusListener implements StatusListener
 {
@@ -32,12 +33,14 @@ public class CustomStatusListener implements StatusListener
 
     private final DifferentialMotor pilot;
     private final Twitter twitter;
+    private final IntList palettesToUse;
     private boolean isProcessing;
 
-    public CustomStatusListener(DifferentialMotor pilot, Twitter twitter)
+    public CustomStatusListener(DifferentialMotor pilot, Twitter twitter, IntList palettesToUse)
     {
         this.pilot = pilot;
         this.twitter = twitter;
+        this.palettesToUse = palettesToUse;
     }
 
     @Override
@@ -75,16 +78,14 @@ public class CustomStatusListener implements StatusListener
                             twitter.updateStatus(statusUpdate);
                         }
 
-//                    MazeParserRunner.printMazeMap(mazeMap);
-                        long mazeParsedTime = System.currentTimeMillis();
                         if (mazeMap != null)
                         {
 
                             MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-                            Pair<MutableStack<Vertex>, Set<Vertex>> pathVisitedVerticesPair = null;
+                            MutableStack<Vertex> path = null;
                             try
                             {
-                                pathVisitedVerticesPair = DijkstraAlgorithm.findPath(vertices);
+                                path = DijkstraAlgorithm.findPath(vertices);
                             }
                             catch (Exception e)
                             {
@@ -93,18 +94,30 @@ public class CustomStatusListener implements StatusListener
                                 statusUpdate.inReplyToStatusId(status.getId());
                                 twitter.updateStatus(statusUpdate);
                             }
-                            if (pathVisitedVerticesPair != null)
+                            if (path != null)
                             {
+                                for (int i = 0; i < this.palettesToUse.size(); i++)
+                                {
+                                    if (this.palettesToUse.get(i) == 0)
+                                    {
+                                        MazeImageCreator.useDefaultPalette();
+                                    }
+                                    if (this.palettesToUse.get(i) == 1)
+                                    {
+                                        MazeImageCreator.useRoboVisionPalette();
+                                    }
+                                    MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
+                                            path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-                                File solvedMaze = FileUtils.writeSolvedMaze(pathVisitedVerticesPair.getOne(), pathVisitedVerticesPair.getTwo(), mazeMap);
-                                long mazeSolvedTime = System.currentTimeMillis();
-                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                        + " Solved your maze:" + mediaEntity.getId());
-                                statusUpdate.setMedia(solvedMaze);
-                                statusUpdate.inReplyToStatusId(status.getId());
-                                twitter.updateStatus(statusUpdate);
+                                    File solvedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
+                                    StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                            + " Solved your maze:" + mediaEntity.getId());
+                                    statusUpdate.setMedia(solvedMaze);
+                                    statusUpdate.inReplyToStatusId(status.getId());
+                                    twitter.updateStatus(statusUpdate);
+                                }
 
-                                List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(pathVisitedVerticesPair.getOne());
+                                List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
                                 Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
                             }
                         }

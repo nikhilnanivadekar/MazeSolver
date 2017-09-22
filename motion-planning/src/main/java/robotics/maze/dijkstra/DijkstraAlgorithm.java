@@ -5,19 +5,17 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectDoubleMap;
 import org.eclipse.collections.api.set.MutableSet;
 import org.eclipse.collections.api.stack.MutableStack;
-import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.factory.Stacks;
 import org.eclipse.collections.impl.factory.primitive.ObjectDoubleMaps;
-import org.eclipse.collections.impl.tuple.Tuples;
 import robotics.maze.enums.PointType;
 
 import java.util.Set;
 
 public class DijkstraAlgorithm
 {
-    public static Pair<MutableStack<Vertex>, Set<Vertex>> findPath(MutableList<Vertex> vertices)
+    public static MutableStack<Vertex> findPath(MutableList<Vertex> vertices)
     {
         Vertex start = vertices.detect(each -> PointType.START == each.getPointType());
         Vertex end = vertices.detect(each -> PointType.FINISH == each.getPointType());
@@ -100,7 +98,7 @@ public class DijkstraAlgorithm
             throw new IllegalStateException("Could not find feasible path between Start and End");
         }
 
-        return Tuples.pair(path, visitedVertices);
+        return path;
     }
 
     public static double getCost(Vertex currentVertex, Vertex successor)
