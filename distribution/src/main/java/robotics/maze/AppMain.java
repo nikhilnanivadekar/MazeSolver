@@ -1,5 +1,9 @@
 package robotics.maze;
 
+import org.eclipse.collections.api.list.primitive.IntList;
+import org.eclipse.collections.api.list.primitive.MutableIntList;
+import org.eclipse.collections.impl.factory.primitive.IntLists;
+import org.eclipse.collections.impl.utility.ArrayIterate;
 import robotics.maze.integration.CustomStatusListener;
 import robotics.maze.utils.Constants;
 import twitter4j.StatusListener;
@@ -14,10 +18,12 @@ import java.util.Scanner;
 
 public class AppMain
 {
-    private static final String HASH_TO_POLL = "nikhilmaze";
+    private static final String HASH_TO_POLL = "solvemaze";
 
     public static void main(String[] args) throws Exception
     {
+        IntList palettesToUse = ArrayIterate.collectInt(args, Integer::valueOf);
+
         DifferentialMotor pilot = new DifferentialMotor(
                 Constants.WHEEL_DIAMETER,
                 Constants.TRACK_WIDTH,
@@ -30,7 +36,7 @@ public class AppMain
         Configuration configuration = AppMain.getConfiguration();
         TwitterStream twitterStream = new TwitterStreamFactory(configuration).getInstance();
         Twitter twitter = new TwitterFactory(configuration).getInstance();
-        StatusListener listener = new CustomStatusListener(pilot, twitter);
+        StatusListener listener = new CustomStatusListener(pilot, twitter, palettesToUse);
 
         twitterStream.addListener(listener);
         twitterStream.filter(HASH_TO_POLL);
