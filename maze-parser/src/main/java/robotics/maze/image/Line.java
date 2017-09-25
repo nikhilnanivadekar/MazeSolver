@@ -53,4 +53,9 @@ public class Line
     {
         return "y = " + this.m + "*x  + " + this.b;
     }
+
+    public String toFormattedString()
+    {
+        return String.format("(%.4f, %.4f)", this.m, this.b);
+    }
 }

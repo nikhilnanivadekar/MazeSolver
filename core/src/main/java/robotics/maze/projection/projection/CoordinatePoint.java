@@ -6,14 +6,14 @@ public class CoordinatePoint
     private double column;
 
     /**
-     * find the intersection point between a--b and c--d line segments.
+     * find the segmentIntersection point between a--b and c--d line segments.
      * @param a - the start of the first segment
      * @param b - the end of the firs segment
      * @param c - the start of the second segment
      * @param d - the start og the second segment
-     * @return the intersection point between the segments
+     * @return the segmentIntersection point between the segments
      */
-    static public CoordinatePoint intersection(CoordinatePoint a, CoordinatePoint b, CoordinatePoint c, CoordinatePoint d)
+    static public CoordinatePoint segmentIntersection(CoordinatePoint a, CoordinatePoint b, CoordinatePoint c, CoordinatePoint d)
     {
         CoordinatePoint r = a.minus(b);
         CoordinatePoint s = c.minus(d);

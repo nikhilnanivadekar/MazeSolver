@@ -14,7 +14,7 @@ public class IntersectionTest
         CoordinatePoint c = new CoordinatePoint(2.0, 1.0);
         CoordinatePoint d = new CoordinatePoint(2.0, 3.0);
 
-        CoordinatePoint intersection = CoordinatePoint.intersection(a, b, c, d);
+        CoordinatePoint intersection = CoordinatePoint.segmentIntersection(a, b, c, d);
 
         this.assertPoint(2.0, 2.0, intersection);
     }
@@ -27,7 +27,7 @@ public class IntersectionTest
         CoordinatePoint c = new CoordinatePoint(3.0, 4.0);
         CoordinatePoint d = new CoordinatePoint(5.0, 2.0);
 
-        CoordinatePoint intersection = CoordinatePoint.intersection(a, b, c, d);
+        CoordinatePoint intersection = CoordinatePoint.segmentIntersection(a, b, c, d);
 
         this.assertPoint(4.0, 3.0, intersection);
     }
@@ -40,7 +40,7 @@ public class IntersectionTest
         CoordinatePoint c = new CoordinatePoint(4.0, 5.0);
         CoordinatePoint d = new CoordinatePoint(6.0, 3.0);
 
-        CoordinatePoint intersection = CoordinatePoint.intersection(a, b, c, d);
+        CoordinatePoint intersection = CoordinatePoint.segmentIntersection(a, b, c, d);
 
         this.assertPoint(5.0, 4.0, intersection);
     }
