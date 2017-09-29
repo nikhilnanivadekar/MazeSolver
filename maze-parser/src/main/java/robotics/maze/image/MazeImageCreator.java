@@ -12,6 +12,10 @@ import robotics.maze.projection.projection.CoordinatePoint;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+import static robotics.maze.image.ImageWrapper.BLUE;
+import static robotics.maze.image.ImageWrapper.GREEN;
+import static robotics.maze.image.ImageWrapper.RED;
+
 public class MazeImageCreator
 {
     // defaultPalette = 0, roboVisionPalette = 1
@@ -64,43 +68,35 @@ public class MazeImageCreator
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
 
-    public static BufferedImage createImageFromParsedMaze(ParsedMazeImage parsedMaze)
+    public static BufferedImage createCanvas(ParsedMazeImage parsedMaze)
     {
         int width = parsedMaze.getWidth();
         int height = parsedMaze.getHeight();
 
-        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    }
 
-        for (int row = 0; row < height; row++)
+    public static void setPixel(BufferedImage bi, int column, int row, PointType pointType, int[] originalRgb)
+    {
+        ColorDescriptor colorDescriptor = selectedPalette.getColorDescriptorForType(pointType);
+
+        if (pointType == PointType.EMPTY)
         {
-            for (int column = 0; column < width; column++)
-            {
-                MazeFeature feature = parsedMaze.getFeatureAt(row, column);
-                PointType pointType = feature.getType();
+            int shading = 255 - (originalRgb[RED] + originalRgb[GREEN] + originalRgb[BLUE]) / 3;
 
-                ColorDescriptor colorDescriptor = selectedPalette.getColorDescriptorForType(pointType);
+            int newRed = colorDescriptor.getRed() - shading;
+            int newGreen = colorDescriptor.getGreen() - shading;
+            int newBlue = colorDescriptor.getBlue() - shading;
 
-                if (pointType == PointType.EMPTY)
-                {
-                    int shading = feature.getShading();
-
-                    int newRed = colorDescriptor.getRed() - shading;
-                    int newGreen = colorDescriptor.getGreen() - shading;
-                    int newBlue = colorDescriptor.getBlue() - shading;
-
-                    bi.setRGB(column, row, toIntRgb(
-                            newRed > 0 ? newRed : 0,
-                            newGreen > 0 ? newGreen : 0,
-                            newBlue > 0 ? newBlue : 0));
-                }
-                else
-                {
-                    bi.setRGB(column, row, colorDescriptor.getColorAsInt());
-                }
-            }
+            bi.setRGB(column, row, toIntRgb(
+                    newRed > 0 ? newRed : 0,
+                    newGreen > 0 ? newGreen : 0,
+                    newBlue > 0 ? newBlue : 0));
         }
-
-        return bi;
+        else
+        {
+            bi.setRGB(column, row, colorDescriptor.getColorAsInt());
+        }
     }
 
     private static void drawLine(Graphics g, CoordinatePoint from, CoordinatePoint to)

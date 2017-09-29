@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static robotics.maze.enums.PointType.EMPTY;
+import static robotics.maze.enums.PointType.*;
 
 public class MazeParser
 {
@@ -38,6 +38,8 @@ public class MazeParser
 
         MutableList<ListIterable<MazeFeature>> cornerBoundaries = Lists.mutable.of();
 
+        BufferedImage bi = MazeImageCreator.createCanvas(parsedMaze);
+
         int[] rgb = new int[3];
 
         MutableList<MazeFeature> cornerPoints = Lists.mutable.of();
@@ -48,26 +50,35 @@ public class MazeParser
             {
                 imageWrapper.retrieveRgbAt(column, row, rgb);
 
+                PointType pointType;
                 if (MarkerColorRange.WALL_MARKER.checkRGB(rgb))
                 {
-                    parsedMaze.createAndSetFeature(column, row, PointType.WALL);
+                    pointType = WALL;
                 }
                 else if (MarkerColorRange.CORNER_MARKER.checkRGB(rgb))
                 {
-                    cornerPoints.add(parsedMaze.createAndSetFeature(column, row, PointType.CORNER));
+                    pointType = CORNER;
                 }
                 else if (MarkerColorRange.START_MARKER.checkRGB(rgb))
                 {
-                    parsedMaze.createAndSetFeature(column, row, PointType.START);
+                    pointType = START;
                 }
                 else if (MarkerColorRange.STOP_MARKER.checkRGB(rgb))
                 {
-                    parsedMaze.createAndSetFeature(column, row, PointType.FINISH);
+                    pointType = FINISH;
                 }
                 else
                 {
-                    parsedMaze.createAndSetFeature(column, row, EMPTY).setShading(rgb);
+                    pointType = EMPTY;
                 }
+
+                MazeFeature mazeFeature = parsedMaze.createAndSetFeature(column, row, pointType);
+                if (pointType == CORNER)
+                {
+                    cornerPoints.add(mazeFeature);
+                }
+
+                MazeImageCreator.setPixel(bi, column, row, pointType, rgb);
             }
         }
 
@@ -85,11 +96,8 @@ public class MazeParser
 
         Stopwatch.report("Filled corner areas");
 
-        BufferedImage bi = MazeImageCreator.createImageFromParsedMaze(parsedMaze);
 //        FileUtils.saveImageToFile(bi, "parsed_maze.PNG");
 //        Stopwatch.report("Parsed and written to file");
-
-        Stopwatch.report("Created baseline image");
 
         MutableList<CoordinatePoint> cornerCenters = cornerBoundaries
                 .select(boundary -> boundary.size() > 2)
@@ -254,7 +262,7 @@ public class MazeParser
 
         Stopwatch.report("Grid computed");
 
-        stats.add("GRD " + targetHeight + ":" + targetWidth);
+        stats.add("DIM " + targetHeight + ":" + targetWidth);
         MazeImageCreator.overlayGridOnImage(bi, grid);
         MazeImageCreator.addTextToImage(bi, stats);
 
