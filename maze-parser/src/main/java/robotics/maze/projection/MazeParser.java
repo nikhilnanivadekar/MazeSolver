@@ -426,50 +426,55 @@ public class MazeParser
 
     private ListIterable<MazeFeature> floodFill(ParsedMazeImage parsedMaze, int row, int column, int tag)
     {
-        MutableSet<MazeFeature> boundary = Sets.mutable.of();
+        MutableList<MazeFeature> boundary = Lists.mutable.of();
         Queue<MazeFeature> queue = new LinkedList<>();
 
         MazeFeature feature = parsedMaze.getFeatureAt(row, column);
         if (feature.isTagged())
         {
-            return boundary.toList();
+            return Lists.immutable.empty();
         }
+
         queue.add(feature);
 
         while (queue.size() > 0)
         {
             feature = queue.poll();
+
+            if (feature.getTag() == tag)
+            {
+                continue;
+            }
+
             MazeFeature west = feature;
             MazeFeature east = feature;
 
+            int currentRow = feature.getRow();
+
             for (MazeFeature next = west;
                  next != null && next.getType() == PointType.CORNER && next.isNotTagged();
-                 next = parsedMaze.getFeatureAt(west.getRow(), west.getColumn() - 1)) // AND CORNER
+                 next = parsedMaze.getFeatureAt(currentRow, west.getColumn() - 1))
             {
                 west = next;
             }
 
-            if (parsedMaze.findAnyNeighborNot(west.getColumn(), west.getRow(), PointType.CORNER) != null)
-            {
-                boundary.add(west);
-            }
-
             for (MazeFeature next = east;
                  next != null && next.getType() == PointType.CORNER && next.isNotTagged();
-                 next = parsedMaze.getFeatureAt(east.getRow(), east.getColumn() + 1)) // AND CORNER
+                 next = parsedMaze.getFeatureAt(currentRow, east.getColumn() + 1))
             {
                 east = next;
             }
 
-            if (parsedMaze.findAnyNeighborNot(east.getColumn(), east.getRow(), PointType.CORNER) != null)
-            {
-                boundary.add(east);
-            }
-
-            int currentRow = feature.getRow();
             for (int col = west.getColumn(); col <= east.getColumn(); col++)
             {
-                parsedMaze.getFeatureAt(currentRow, col).setTag(tag);
+                MazeFeature featureToTag = parsedMaze.getFeatureAt(currentRow, col);
+
+                featureToTag.setTag(tag);
+
+                if (parsedMaze.findAnyNeighborNot(col, currentRow, PointType.CORNER) != null)
+                {
+                    boundary.add(featureToTag);
+                }
 
                 MazeFeature featureNorth = parsedMaze.getFeatureAt(currentRow - 1, col);
                 if (featureNorth != null && featureNorth.getType() == PointType.CORNER && featureNorth.isNotTagged())
@@ -485,7 +490,7 @@ public class MazeParser
             }
         }
 
-        return boundary.toList();
+        return boundary;
     }
 
     private CoordinatePoint computeIncrement(CoordinatePoint start, CoordinatePoint end, int steps)

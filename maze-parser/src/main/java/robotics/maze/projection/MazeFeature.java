@@ -10,7 +10,6 @@ public class MazeFeature
 {
     private PointType type;
     private int tag = -1;
-    private int shading = 0;
     private int column;
     private int row;
 
@@ -54,15 +53,5 @@ public class MazeFeature
     public int getRow()
     {
         return this.row;
-    }
-
-    public int getShading()
-    {
-        return this.shading;
-    }
-
-    public void setShading(int[] rgb)
-    {
-        this.shading = 255 - (rgb[RED] + rgb[GREEN] + rgb[BLUE]) / 3; // 255 - complementary; 3 - to average
     }
 }

@@ -23,7 +23,7 @@ public class ParsingAndDrawingTestMain
         }
 
         Stopwatch.enableOutput();
-        Stopwatch.start("Maze solving!");
+        Stopwatch.start("Loading image");
         JpegImageWrapper imageWrapper = JpegImageWrapper.loadFile(args[0]);
 
         MazeImageCreator.useRoboVisionPalette();
