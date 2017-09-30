@@ -9,7 +9,7 @@ public enum MarkerColorRange
     CORNER_MARKER(340, 15, (h, s, l) -> canTellWhatColor(s, l)), // mostly red
     EMPTY_MARKER(0, 360, (h, s, l) -> l > 0.93), // mostly white
     WALL_MARKER(0, 360, (h, s, l) -> l < 0.07 || s + l < .5), // mostly black
-    START_MARKER(75, 158, (h, s, l) -> canTellWhatColor(s, l)), // mostly green
+    START_MARKER(62, 158, (h, s, l) -> canTellWhatColor(s, l)), // mostly green, including lime-y green
     STOP_MARKER(190, 252, (h, s, l) -> canTellWhatColor(s, l)); // mostly blue
 
     private static boolean canTellWhatColor(double saturation, double luminance)

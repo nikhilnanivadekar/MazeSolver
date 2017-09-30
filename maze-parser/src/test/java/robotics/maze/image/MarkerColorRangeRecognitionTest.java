@@ -41,6 +41,11 @@ public class MarkerColorRangeRecognitionTest
         this.pickedByRange(MarkerColorRange.START_MARKER, 20, 85, 58);
         this.pickedByRange(MarkerColorRange.START_MARKER,  6, 47, 26);
         this.pickedByRange(MarkerColorRange.START_MARKER,  9, 65, 40);
+
+        // lime color
+        this.pickedByRange(MarkerColorRange.START_MARKER,  153, 172, 31);
+        this.pickedByRange(MarkerColorRange.START_MARKER,  151, 158, 30);
+        this.pickedByRange(MarkerColorRange.START_MARKER,  155, 169, 34);
     }
 
     @Test
@@ -84,8 +89,8 @@ public class MarkerColorRangeRecognitionTest
 
     private void pickedByRange(MarkerColorRange colorRange, int red, int green, int blue)
     {
-        Assert.assertTrue(colorRange.checkRGB(red, green, blue));
+        Assert.assertTrue("Color matches the expected range", colorRange.checkRGB(red, green, blue));
 
-        allColorRanges.reject(colorRange::equals).forEach(each -> Assert.assertFalse(each.checkRGB(red, green, blue)));
+        allColorRanges.reject(colorRange::equals).forEach(each -> Assert.assertFalse("Color doesn't match other ranges", each.checkRGB(red, green, blue)));
     }
 }
