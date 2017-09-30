@@ -4,6 +4,7 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.stack.MutableStack;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.image.JpegImageWrapper;
 import robotics.maze.image.MazeImageCreator;
 import robotics.maze.projection.MazeParser;
@@ -37,22 +38,30 @@ public class ParsingAndDrawingTestMain
 
         MazeParserRunner.printMazeMap(mazeMap);
 
-        MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-        MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
 
-        Stopwatch.report("Maze solved");
+        try
+        {
+            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+            MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
 
-        MazeImageCreator.drawPathOnImage(
-                mazeMap.getMazeImage(),
-                mazeMap.getOriginalImageCoordinates(),
-                path.collect(vertex -> PrimitiveTuples.pair(vertex.getX(), vertex.getY()), Lists.mutable.of()));
+            Stopwatch.report("Maze solved");
 
-        MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
-                path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
+            MazeImageCreator.drawPathOnImage(
+                    mazeMap.getMazeImage(),
+                    mazeMap.getOriginalImageCoordinates(),
+                    path.collect(vertex -> PrimitiveTuples.pair(vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-        Stopwatch.report("Path drawn");
+            MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
+                    path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-        FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
+            Stopwatch.report("Path drawn");
+        }
+        catch (AmazeProcessingException e)
+        {
+            System.out.println("Failed: " + e.getMessage());
+        }
+
+        FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path");
 
         Stopwatch.report("Wrote path");
         Stopwatch.stop("Done");

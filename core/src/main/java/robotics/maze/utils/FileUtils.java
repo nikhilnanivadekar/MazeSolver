@@ -36,12 +36,13 @@ public class FileUtils
 
     public static File saveImageToFile(BufferedImage bi, String fileName)
     {
+        String format = "JPG";
         try
         {
-            File output = new File(fileName);
+            File output = new File(fileName+"."+format.toLowerCase());
             boolean cache = ImageIO.getUseCache();
             ImageIO.setUseCache(false);
-            ImageIO.write(bi, "PNG", output);
+            ImageIO.write(bi, format, output);
             ImageIO.setUseCache(cache);
             return output;
         }
