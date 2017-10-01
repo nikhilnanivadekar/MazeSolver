@@ -38,27 +38,33 @@ public class ParsingAndDrawingTestMain
 
         MazeParserRunner.printMazeMap(mazeMap);
 
-
-        try
+        if (mazeMap.isSuccess())
         {
-            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-            MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
+            try
+            {
+                MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
 
-            Stopwatch.report("Maze solved");
+                Stopwatch.report("Maze solved");
 
-            MazeImageCreator.drawPathOnImage(
-                    mazeMap.getMazeImage(),
-                    mazeMap.getOriginalImageCoordinates(),
-                    path.collect(vertex -> PrimitiveTuples.pair(vertex.getX(), vertex.getY()), Lists.mutable.of()));
+                MazeImageCreator.drawPathOnImage(
+                        mazeMap.getMazeImage(),
+                        mazeMap.getOriginalImageCoordinates(),
+                        path.collect(vertex -> PrimitiveTuples.pair(vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-            MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
-                    path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
+                MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
+                        path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-            Stopwatch.report("Path drawn");
+                Stopwatch.report("Path drawn");
+            }
+            catch (AmazeProcessingException e)
+            {
+                System.out.println("Failed: " + e.getMessage());
+            }
         }
-        catch (AmazeProcessingException e)
+        else
         {
-            System.out.println("Failed: " + e.getMessage());
+            mazeMap.getGrievances().each(System.out::println);
         }
 
         FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path");

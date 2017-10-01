@@ -1,5 +1,8 @@
 package robotics.maze.projection.projection;
 
+import org.eclipse.collections.api.list.ListIterable;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.factory.Lists;
 import robotics.maze.enums.PointType;
 
 import java.awt.image.BufferedImage;
@@ -9,6 +12,7 @@ public class MazeMap
     private int[][] cells;
     private int width;
     private int height;
+    private MutableList<String> grievances = Lists.mutable.of();
 
     private BufferedImage mazeImage;
 
@@ -85,5 +89,20 @@ public class MazeMap
     public void setOriginalImageCoordinates(CoordinatePoint[][] originalImageCoordinates)
     {
         this.originalImageCoordinates = originalImageCoordinates;
+    }
+
+    public boolean isSuccess()
+    {
+        return this.grievances.isEmpty();
+    }
+
+    public ListIterable<String> getGrievances()
+    {
+        return this.grievances;
+    }
+
+    public void addGrievance(String newGrievance)
+    {
+        this.grievances.add(newGrievance);
     }
 }

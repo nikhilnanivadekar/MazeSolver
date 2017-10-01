@@ -31,6 +31,8 @@ public class MazeParser
     {
         Stopwatch.report("Starting parsing");
 
+        MazeMap result = new MazeMap(targetWidth, targetHeight);
+
         int imageWidth = imageWrapper.getWidth();
         int imageHeight = imageWrapper.getHeight();
 
@@ -108,7 +110,8 @@ public class MazeParser
 
         if (cornerCenters.size() < 4)
         {
-            throw new AmazeProcessingException("Detected corner markers for " + cornerCenters.size() + " corners, 4 expected");
+            result.addGrievance("Detected corner markers for " + cornerCenters.size() + " corners, 4 expected");
+            return result;
         }
 
         Stopwatch.report("Selected 4 candidate corners");
@@ -143,8 +146,6 @@ public class MazeParser
         }
 
         Stopwatch.report("Identified corners");
-
-        MazeMap result = new MazeMap(targetWidth, targetHeight);
 
         // points on the original image to inspect to translate into maze features
         CoordinatePoint[][] grid = new CoordinatePoint[targetHeight][targetWidth];
@@ -312,11 +313,14 @@ public class MazeParser
         result.setMazeImage(bi);
         result.setOriginalImageCoordinates(grid);
 
-        if (!(foundStart && foundFinish))
+        if (!foundStart)
         {
-            throw new AmazeProcessingException(
-                    (foundStart ? "" : "The start marker is missing. ") +
-                            (foundFinish ? "" : "The finish marker is missing."));
+            result.addGrievance("The start marker is missing.");
+        }
+
+        if (!foundFinish)
+        {
+            result.addGrievance("The finish marker is missing.");
         }
 
         return result;
