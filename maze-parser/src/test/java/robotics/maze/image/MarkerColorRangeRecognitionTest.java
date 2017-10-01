@@ -24,7 +24,7 @@ public class MarkerColorRangeRecognitionTest
     }
 
     @Test
-    public void testGreen()
+    public void testGreen() // green is hard
     {
         this.pickedByRange(MarkerColorRange.START_MARKER, 0, 255, 0);
         this.pickedByRange(MarkerColorRange.START_MARKER, 97, 127, 61);
@@ -32,6 +32,9 @@ public class MarkerColorRangeRecognitionTest
         this.pickedByRange(MarkerColorRange.START_MARKER, 102, 134, 65);
         this.pickedByRange(MarkerColorRange.START_MARKER, 46, 142, 90);
         this.pickedByRange(MarkerColorRange.START_MARKER, 102, 225, 102);
+
+        this.pickedByRange(MarkerColorRange.START_MARKER,  55, 102, 55);
+        this.pickedByRange(MarkerColorRange.START_MARKER,  76, 121, 78);
 
         this.pickedByRange(MarkerColorRange.START_MARKER, 127, 174, 94);
         this.pickedByRange(MarkerColorRange.START_MARKER, 124, 171, 91);

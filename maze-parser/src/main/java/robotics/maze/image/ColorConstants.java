@@ -3,7 +3,7 @@ package robotics.maze.image;
 public class ColorConstants
 {
     public static final double S_MAX  = 1.00;
-    public static final double S_MIN  = 0.318;
+    public static final double S_MIN  = 0.21;
 
     public static final double L_MAX  = 0.80;
     public static final double L_MIN  = 0.10;
