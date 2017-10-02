@@ -5,7 +5,6 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.impl.factory.Maps;
 import robotics.maze.enums.PointType;
-import robotics.maze.projection.MazeFeature;
 import robotics.maze.projection.ParsedMazeImage;
 import robotics.maze.projection.projection.CoordinatePoint;
 
@@ -138,36 +137,42 @@ public class MazeImageCreator
 
     public static void addRightTextToImage(BufferedImage bi, ListIterable<String> text)
     {
-        Graphics g = bi.getGraphics();
-
-        int lineHeight = bi.getHeight() / 50;
-        float fontHeight = (float) (0.8 * lineHeight);
-        Font font = selectedPalette.getFont().deriveFont(fontHeight);
-
-        g.setColor(selectedPalette.getTextColor());
-        g.setFont(font);
-
-        if (text.size() > 0)
+        if (text.notEmpty())
         {
-            int leftMargin = bi.getWidth() - g.getFontMetrics().stringWidth(text.get(0) + "000:00") - 20;
-            text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, leftMargin, (i + 1) * lineHeight));
+            Graphics g = bi.getGraphics();
+
+            int lineHeight = bi.getHeight() / 50;
+            float fontHeight = (float) (0.8 * lineHeight);
+            Font font = selectedPalette.getFont().deriveFont(fontHeight);
+
+            g.setColor(selectedPalette.getTextColor());
+            g.setFont(font);
+
+            if (text.size() > 0)
+            {
+                int leftMargin = bi.getWidth() - g.getFontMetrics().stringWidth(text.get(0) + "000:00") - 20;
+                text.forEachWithIndex((s, i) -> g.drawString(String.format("%03d", i) + ": " + s, leftMargin, (i + 1) * lineHeight));
+            }
         }
     }
 
     public static void drawPathOnImage(BufferedImage bi, CoordinatePoint[][] grid, ListIterable<IntIntPair> pathPointsOnGrid)
     {
-        Graphics g = bi.getGraphics();
-
-        g.setColor(new Color(selectedPalette.getColorForType(PointType.PATH), true));
-
-        ((Graphics2D) g).setStroke(new BasicStroke(10));
-
-        CoordinatePoint currentPoint = grid[pathPointsOnGrid.get(0).getOne()][pathPointsOnGrid.get(0).getTwo()];
-        for (int i = 1; i < pathPointsOnGrid.size(); i++)
+        if (pathPointsOnGrid.notEmpty())
         {
-            CoordinatePoint nextPoint = grid[pathPointsOnGrid.get(i).getOne()][pathPointsOnGrid.get(i).getTwo()];
-            drawLine(g, currentPoint, nextPoint);
-            currentPoint = nextPoint;
+            Graphics g = bi.getGraphics();
+
+            g.setColor(new Color(selectedPalette.getColorForType(PointType.PATH), true));
+
+            ((Graphics2D) g).setStroke(new BasicStroke(10));
+
+            CoordinatePoint currentPoint = grid[pathPointsOnGrid.get(0).getOne()][pathPointsOnGrid.get(0).getTwo()];
+            for (int i = 1; i < pathPointsOnGrid.size(); i++)
+            {
+                CoordinatePoint nextPoint = grid[pathPointsOnGrid.get(i).getOne()][pathPointsOnGrid.get(i).getTwo()];
+                drawLine(g, currentPoint, nextPoint);
+                currentPoint = nextPoint;
+            }
         }
     }
 

@@ -96,7 +96,6 @@ public class DijkstraAlgorithm
         else
         {
             System.out.println("Could not find feasible path between Start and End");
-            throw new AmazeProcessingException("Could not find feasible path between Start and End");
         }
 
         return path;

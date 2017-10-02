@@ -3,14 +3,11 @@ package robotics.maze.projection;
 import org.eclipse.collections.api.block.function.primitive.DoubleFunction;
 import org.eclipse.collections.api.list.ListIterable;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.set.MutableSet;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.api.tuple.primitive.ObjectLongPair;
 import org.eclipse.collections.impl.factory.Lists;
-import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import robotics.maze.enums.PointType;
-import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.image.ImageWrapper;
 import robotics.maze.image.Line;
 import robotics.maze.image.MarkerColorRange;
@@ -23,7 +20,11 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static robotics.maze.enums.PointType.*;
+import static robotics.maze.enums.PointType.CORNER;
+import static robotics.maze.enums.PointType.EMPTY;
+import static robotics.maze.enums.PointType.FINISH;
+import static robotics.maze.enums.PointType.START;
+import static robotics.maze.enums.PointType.WALL;
 
 public class MazeParser
 {
@@ -110,7 +111,7 @@ public class MazeParser
 
         if (cornerCenters.size() < 4)
         {
-            result.addGrievance("Detected corner markers for " + cornerCenters.size() + " corners, 4 expected");
+            result.addGrievance("Detected only " + cornerCenters.size() + " corner markers");
             return result;
         }
 
@@ -284,8 +285,8 @@ public class MazeParser
                 // determine the center of the area we want to check
                 // and the range of the area to check to determine the dominant point type
 
-                IntIntPair rowRange = this.findNeighborhoodBoundary(grid, curRow, curCol, curRow-1, curCol, imageHeight, CoordinatePoint::getRow);
-                IntIntPair colRange = this.findNeighborhoodBoundary(grid, curRow, curCol, curRow, curCol-1, imageWidth, CoordinatePoint::getColumn);
+                IntIntPair rowRange = this.findNeighborhoodBoundary(grid, curRow, curCol, curRow - 1, curCol, imageHeight, CoordinatePoint::getRow);
+                IntIntPair colRange = this.findNeighborhoodBoundary(grid, curRow, curCol, curRow, curCol - 1, imageWidth, CoordinatePoint::getColumn);
 
                 switch (parsedMaze.getPredominantPointTypeInTheArea(rowRange.getOne(), rowRange.getTwo(), colRange.getOne(), colRange.getTwo()))
                 {
@@ -315,12 +316,12 @@ public class MazeParser
 
         if (!foundStart)
         {
-            result.addGrievance("The start marker is missing.");
+            result.addGrievance("Start marker missing");
         }
 
         if (!foundFinish)
         {
-            result.addGrievance("The finish marker is missing.");
+            result.addGrievance("Finish marker missing");
         }
 
         return result;

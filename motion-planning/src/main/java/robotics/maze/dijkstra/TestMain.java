@@ -29,7 +29,7 @@ public class TestMain
         MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
         MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
 
-        FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
+        FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path");
 //        MazeParserRunner.printMazeMap(mazeMap);
         List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
 

@@ -1,9 +1,9 @@
 package robotics.maze.integration;
 
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.stack.MutableStack;
 import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 import robotics.maze.DifferentialMotor;
 import robotics.maze.Ev3Traverser;
@@ -14,6 +14,7 @@ import robotics.maze.exceptions.AmazeProcessingException;
 import robotics.maze.image.JpegImageWrapper;
 import robotics.maze.image.MazeImageCreator;
 import robotics.maze.projection.MazeParser;
+import robotics.maze.projection.MazeParserRunner;
 import robotics.maze.projection.projection.MazeMap;
 import robotics.maze.utils.FileUtils;
 import twitter4j.Logger;
@@ -34,14 +35,12 @@ public class CustomStatusListener implements StatusListener
 
     private final DifferentialMotor pilot;
     private final Twitter twitter;
-    private final IntList palettesToUse;
     private boolean isProcessing;
 
-    public CustomStatusListener(DifferentialMotor pilot, Twitter twitter, IntList palettesToUse)
+    public CustomStatusListener(DifferentialMotor pilot, Twitter twitter)
     {
         this.pilot = pilot;
         this.twitter = twitter;
-        this.palettesToUse = palettesToUse;
     }
 
     @Override
@@ -68,37 +67,49 @@ public class CustomStatusListener implements StatusListener
                             MazeParser mazeParser = new MazeParser();
                             MazeMap mazeMap = mazeParser.buildFromImage(imageWrapper, 19, 19);
 
-                            MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
-                            MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
+                            MazeParserRunner.printMazeMap(mazeMap);
 
-                            for (int i = 0; i < this.palettesToUse.size(); i++)
+                            if (mazeMap.isSuccess())
                             {
-                                if (this.palettesToUse.get(i) == 0)
-                                {
-                                    MazeImageCreator.useDefaultPalette();
-                                }
-                                if (this.palettesToUse.get(i) == 1)
-                                {
-                                    MazeImageCreator.useRoboVisionPalette();
-                                }
+                                MutableList<Vertex> vertices = MazeMapToVertexListAdapter.adapt(mazeMap);
+                                MutableStack<Vertex> path = DijkstraAlgorithm.findPath(vertices);
+
+                                MazeImageCreator.drawPathOnImage(
+                                        mazeMap.getMazeImage(),
+                                        mazeMap.getOriginalImageCoordinates(),
+                                        path.collect(vertex -> PrimitiveTuples.pair(vertex.getX(), vertex.getY()), Lists.mutable.of()));
                                 MazeImageCreator.addRightTextToImage(mazeMap.getMazeImage(),
                                         path.collect(vertex -> String.format("%02d-%02d", vertex.getX(), vertex.getY()), Lists.mutable.of()));
 
-                                File solvedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path.PNG");
+                                File solvedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "parsed_maze_path");
+                                String midString = path.isEmpty() ? " Could find path!" : " Solved your maze:";
+
                                 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                        + " Solved your maze:" + mediaEntity.getId());
+                                        + midString + mediaEntity.getId());
                                 statusUpdate.setMedia(solvedMaze);
                                 statusUpdate.inReplyToStatusId(status.getId());
                                 twitter.updateStatus(statusUpdate);
-                            }
 
-                            List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
-                            Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
+                                if (path.notEmpty())
+                                {
+                                    List<Vertex> flattenedPath = Ev3Traverser.getFlattenedPath(path);
+                                    Ev3Traverser.moveAlongPath(this.pilot, flattenedPath);
+                                }
+                            }
+                            else
+                            {
+                                File unparsedMaze = FileUtils.saveImageToFile(mazeMap.getMazeImage(), "unparsed_maze_path");
+                                StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
+                                        + " " + mazeMap.getGrievances().makeString(", "));
+                                statusUpdate.setMedia(unparsedMaze);
+                                statusUpdate.inReplyToStatusId(status.getId());
+                                twitter.updateStatus(statusUpdate);
+                            }
                         }
                         catch (AmazeProcessingException e)
                         {
                             StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()
-                                    + e.getMessage());
+                                    + " " + e.getMessage());
                             statusUpdate.inReplyToStatusId(status.getId());
                             twitter.updateStatus(statusUpdate);
                         }

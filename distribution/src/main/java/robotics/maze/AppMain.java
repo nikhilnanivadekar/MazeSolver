@@ -4,6 +4,7 @@ import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.MutableIntList;
 import org.eclipse.collections.impl.factory.primitive.IntLists;
 import org.eclipse.collections.impl.utility.ArrayIterate;
+import robotics.maze.image.MazeImageCreator;
 import robotics.maze.integration.CustomStatusListener;
 import robotics.maze.utils.Constants;
 import twitter4j.StatusListener;
@@ -22,8 +23,6 @@ public class AppMain
 
     public static void main(String[] args) throws Exception
     {
-        IntList palettesToUse = ArrayIterate.collectInt(args, Integer::valueOf);
-
         DifferentialMotor pilot = new DifferentialMotor(
                 Constants.WHEEL_DIAMETER,
                 Constants.TRACK_WIDTH,
@@ -33,10 +32,12 @@ public class AppMain
                 Constants.TRAVEL_SPEED,
                 Constants.EV3_IP_ADDRESS);
 
+        MazeImageCreator.useRoboVisionPalette();
+
         Configuration configuration = AppMain.getConfiguration();
         TwitterStream twitterStream = new TwitterStreamFactory(configuration).getInstance();
         Twitter twitter = new TwitterFactory(configuration).getInstance();
-        StatusListener listener = new CustomStatusListener(pilot, twitter, palettesToUse);
+        StatusListener listener = new CustomStatusListener(pilot, twitter);
 
         twitterStream.addListener(listener);
         twitterStream.filter(HASH_TO_POLL);
